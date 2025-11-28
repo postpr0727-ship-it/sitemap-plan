@@ -56,8 +56,46 @@
         </div>
       </header>
 
-      <!-- 메인 -->
-      <main class="flex-1">
+      <!-- 인트로 / 입장 화면 -->
+      <section
+        id="intro-screen"
+        class="flex-1 flex items-center justify-center px-4 py-10"
+      >
+        <div
+          class="max-w-xl w-full bg-slate-900/80 border border-slate-800 rounded-2xl px-6 py-8 shadow-xl"
+        >
+          <h2 class="text-lg font-semibold text-slate-50 mb-2">
+            사이트맵 기획 보드에 오신 것을 환영합니다
+          </h2>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">
+            여러 회사/프로젝트의 홈페이지 구조를 프로젝트별로 나누어 설계하고,
+            상·하위 메뉴와 URL을 한 번에 정리할 수 있는 도구입니다.
+          </p>
+          <ul class="text-[11px] text-slate-300 space-y-1 mb-6 list-disc list-inside">
+            <li>좌측에서 <span class="font-semibold">작업 프로젝트</span>를 선택하거나 새로 만듭니다.</li>
+            <li>페이지별 <span class="font-semibold">제목 · URL · 상위 메뉴 · 요약</span>을 입력합니다.</li>
+            <li>우측에서 <span class="font-semibold">사이트맵 구조</span>와 <span class="font-semibold">페이지 목록</span>을 함께 확인합니다.</li>
+            <li>완료되면 상단의 <span class="font-semibold">JSON 내보내기</span> 버튼으로 결과를 파일로 저장하세요.</li>
+          </ul>
+          <div class="flex items-center justify-between gap-3">
+            <button
+              id="start-default-project"
+              class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium px-3 py-2 text-xs transition"
+            >
+              기본 프로젝트로 시작하기
+            </button>
+            <button
+              id="start-new-project"
+              class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-100 px-3 py-2 text-xs transition"
+            >
+              새 프로젝트 만들기
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 메인 작업 영역 -->
+      <main id="app-shell" class="flex-1 hidden">
         <div class="max-w-6xl mx-auto px-4 py-4 flex gap-4">
           <!-- 좌측: 입력 사이드바 -->
           <aside
@@ -289,6 +327,13 @@
       const projects = [];
       let currentProjectId = null;
       let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
+
+      const introScreen = document.getElementById("intro-screen");
+      const appShell = document.getElementById("app-shell");
+      const startDefaultProjectBtn = document.getElementById(
+        "start-default-project"
+      );
+      const startNewProjectBtn = document.getElementById("start-new-project");
 
       const form = document.getElementById("page-form");
       const editingIdInput = document.getElementById("editing-id");
@@ -951,6 +996,32 @@
         const defaultProject = createProject("기본 프로젝트");
         setCurrentProject(defaultProject.id);
       })();
+
+      // 인트로 → 메인 전환
+      function showAppShell() {
+        introScreen.classList.add("hidden");
+        appShell.classList.remove("hidden");
+      }
+
+      startDefaultProjectBtn.addEventListener("click", () => {
+        // 이미 기본 프로젝트가 선택된 상태이므로 바로 진입
+        showAppShell();
+      });
+
+      startNewProjectBtn.addEventListener("click", () => {
+        let name = prompt(
+          "새 프로젝트 이름을 입력하세요.",
+          "새 프로젝트"
+        );
+        if (name === null) return;
+        name = name.trim();
+        if (!name) {
+          name = `프로젝트 ${projects.length + 1}`;
+        }
+        const project = createProject(name);
+        setCurrentProject(project.id);
+        showAppShell();
+      });
     </script>
   </body>
 </html>
