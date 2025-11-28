@@ -65,14 +65,38 @@
           >
             <!-- 입력 폼 -->
             <div class="flex flex-col gap-1.5">
-              <h2 class="text-sm font-semibold text-slate-100">
-                페이지 정보 입력
-              </h2>
-              <div class="flex flex-wrap gap-1 text-[11px] text-slate-400">
-                <span
-                  class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
-                  >Page Information</span
-                >
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-semibold text-slate-100">
+                  페이지 정보 입력
+                </h2>
+              </div>
+              <!-- 프로젝트 선택 -->
+              <div class="flex flex-col gap-1 text-[11px] text-slate-400">
+                <div class="flex items-center gap-2">
+                  <label for="project-select" class="whitespace-nowrap"
+                    >작업 프로젝트</label
+                  >
+                  <select
+                    id="project-select"
+                    class="flex-1 rounded-lg border border-slate-700 bg-slate-900/70 px-2 py-1 text-[11px] focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                  >
+                    <!-- JS에서 채움 -->
+                  </select>
+                  <button
+                    type="button"
+                    id="new-project-button"
+                    class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-[11px] text-slate-200"
+                  >
+                    새 프로젝트
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                  >
+                    <span id="current-project-label">기본 프로젝트</span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -261,14 +285,21 @@
     </div>
 
     <script>
-      // 페이지 데이터 저장용 메모리
-      const pages = [];
+      // 프로젝트 & 페이지 데이터 저장용 메모리
+      const projects = [];
+      let currentProjectId = null;
+      let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
 
       const form = document.getElementById("page-form");
       const editingIdInput = document.getElementById("editing-id");
       const addButton = document.getElementById("add-button");
       const updateButton = document.getElementById("update-button");
       const deleteButton = document.getElementById("delete-button");
+      const projectSelect = document.getElementById("project-select");
+      const newProjectButton = document.getElementById("new-project-button");
+      const currentProjectLabel = document.getElementById(
+        "current-project-label"
+      );
       const parentSelect = document.getElementById("parent-id");
       const pageTableBody = document.getElementById("page-table-body");
       const pageCountBadge = document.getElementById("page-count");
@@ -280,6 +311,53 @@
       // 간단한 ID 생성
       const createId = () =>
         "p_" + Math.random().toString(36).substring(2, 9);
+
+      // 현재 프로젝트 가져오기
+      function getCurrentProject() {
+        return projects.find((p) => p.id === currentProjectId) || null;
+      }
+
+      // 프로젝트 선택 UI 갱신
+      function refreshProjectSelect() {
+        projectSelect.innerHTML = "";
+        projects.forEach((p) => {
+          const option = document.createElement("option");
+          option.value = p.id;
+          const count = p.pages.length;
+          option.textContent = `${p.name}${
+            count ? ` (${count} 페이지)` : ""
+          }`;
+          projectSelect.appendChild(option);
+        });
+        if (currentProjectId) {
+          projectSelect.value = currentProjectId;
+        }
+        const current = getCurrentProject();
+        if (current) {
+          currentProjectLabel.textContent = current.name;
+        }
+      }
+
+      // 프로젝트 생성
+      function createProject(name) {
+        const id = "proj_" + Math.random().toString(36).substring(2, 9);
+        const project = { id, name, pages: [] };
+        projects.push(project);
+        return project;
+      }
+
+      // 프로젝트 전환
+      function setCurrentProject(id) {
+        const project = projects.find((p) => p.id === id);
+        if (!project) return;
+        currentProjectId = id;
+        pages = project.pages;
+        resetForm();
+        refreshProjectSelect();
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+      }
 
       // 폼에서 값 가져오기
       function getFormData() {
@@ -844,14 +922,35 @@
         deletePage(editingId);
       });
 
+      // 프로젝트 선택 변경
+      projectSelect.addEventListener("change", () => {
+        const targetId = projectSelect.value;
+        if (targetId && targetId !== currentProjectId) {
+          setCurrentProject(targetId);
+        }
+      });
+
+      // 새 프로젝트 생성
+      newProjectButton.addEventListener("click", () => {
+        let name = prompt("새 프로젝트 이름을 입력하세요.", "새 프로젝트");
+        if (name === null) return; // 취소
+        name = name.trim();
+        if (!name) {
+          name = `프로젝트 ${projects.length + 1}`;
+        }
+        const project = createProject(name);
+        setCurrentProject(project.id);
+      });
+
       expandAllBtn.addEventListener("click", expandAll);
       collapseAllBtn.addEventListener("click", collapseAll);
       exportJsonBtn.addEventListener("click", exportJson);
 
-      // 초기 렌더
-      refreshParentOptions();
-      renderTable();
-      renderSitemap();
+      // 초기 프로젝트 생성 및 렌더
+      (function initProjects() {
+        const defaultProject = createProject("기본 프로젝트");
+        setCurrentProject(defaultProject.id);
+      })();
     </script>
   </body>
 </html>
