@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 픽셀 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
       /* 스크롤바 최소화 */
       * {
@@ -22,81 +26,315 @@
       ::-webkit-scrollbar-track {
         background-color: transparent;
       }
+
+      /* 80년대 오락실 스타일 */
+      .arcade-screen {
+        background: #0a0a0a;
+        border: 8px solid #1a1a1a;
+        box-shadow: 
+          0 0 20px rgba(0, 255, 0, 0.5),
+          inset 0 0 30px rgba(0, 0, 0, 0.8),
+          0 0 0 4px #00ff00,
+          0 0 0 8px #1a1a1a;
+        position: relative;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      .arcade-screen::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+          repeating-linear-gradient(
+            0deg,
+            rgba(0, 255, 0, 0.03) 0px,
+            transparent 1px,
+            transparent 2px,
+            rgba(0, 255, 0, 0.03) 3px
+          );
+        pointer-events: none;
+        animation: scanline 0.1s linear infinite;
+      }
+
+      @keyframes scanline {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(4px); }
+      }
+
+      .pixel-font {
+        font-family: 'Press Start 2P', cursive;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+        text-shadow: 
+          0 0 10px currentColor,
+          0 0 20px currentColor;
+      }
+
+      .neon-green {
+        color: #00ff00;
+        text-shadow: 
+          0 0 5px #00ff00,
+          0 0 10px #00ff00,
+          0 0 15px #00ff00,
+          0 0 20px #00ff00;
+      }
+
+      .neon-pink {
+        color: #ff00ff;
+        text-shadow: 
+          0 0 5px #ff00ff,
+          0 0 10px #ff00ff,
+          0 0 15px #ff00ff;
+      }
+
+      .neon-blue {
+        color: #00ffff;
+        text-shadow: 
+          0 0 5px #00ffff,
+          0 0 10px #00ffff,
+          0 0 15px #00ffff;
+      }
+
+      .neon-yellow {
+        color: #ffff00;
+        text-shadow: 
+          0 0 5px #ffff00,
+          0 0 10px #ffff00,
+          0 0 15px #ffff00,
+          0 0 20px #ffff00;
+      }
+
+      .pixel-input {
+        background: #000;
+        border: 4px solid #00ff00;
+        color: #00ff00;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 10px;
+        padding: 12px;
+        background: #0a0a0a;
+        box-shadow: 
+          inset 0 0 10px rgba(0, 255, 0, 0.3),
+          0 0 10px rgba(0, 255, 0, 0.5);
+        image-rendering: pixelated;
+      }
+
+      .pixel-input::placeholder {
+        color: #00ff0050;
+        opacity: 0.5;
+      }
+
+      .pixel-input:focus {
+        outline: none;
+        border-color: #00ffff;
+        color: #00ffff;
+        box-shadow: 
+          inset 0 0 10px rgba(0, 255, 255, 0.3),
+          0 0 15px rgba(0, 255, 255, 0.8),
+          0 0 25px rgba(0, 255, 255, 0.5);
+      }
+
+      .pixel-button {
+        background: #00ff00;
+        color: #000;
+        border: 4px solid #00ff00;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 10px;
+        padding: 12px 24px;
+        cursor: pointer;
+        box-shadow: 
+          0 0 10px rgba(0, 255, 0, 0.8),
+          inset 0 0 10px rgba(0, 0, 0, 0.3);
+        image-rendering: pixelated;
+        transition: all 0.1s;
+        position: relative;
+      }
+
+      .pixel-button:hover {
+        background: #00ffff;
+        border-color: #00ffff;
+        box-shadow: 
+          0 0 15px rgba(0, 255, 255, 1),
+          inset 0 0 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .pixel-button:active {
+        transform: translateY(0);
+        box-shadow: 
+          0 0 5px rgba(0, 255, 255, 0.8),
+          inset 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .blink {
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+      }
+
+      .grid-pattern {
+        background-image: 
+          linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+
+      .arcade-title {
+        font-size: 16px;
+        line-height: 1.8;
+        letter-spacing: 2px;
+      }
+
+      .arcade-subtitle {
+        font-size: 10px;
+        line-height: 1.6;
+        letter-spacing: 1px;
+      }
+
+      /* 커서 깜빡임 효과 */
+      @keyframes cursor-blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+      }
+
+      .pixel-input::after {
+        content: '|';
+        animation: cursor-blink 1s infinite;
+        color: #00ff00;
+      }
+
+      /* 게임 오버 효과 */
+      .game-over {
+        animation: shake 0.5s;
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+      }
     </style>
   </head>
-  <body class="min-h-screen bg-slate-950 text-slate-100">
+  <body class="min-h-screen bg-black text-slate-100" style="background: #000;">
     <div class="min-h-screen flex flex-col">
-      <!-- 헤더 -->
-      <header
-        class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20"
-      >
-        <div
-          class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4"
-        >
-          <div>
-            <h1 class="text-xl font-semibold tracking-tight">
-              사이트맵 기획 보드
-            </h1>
-            <p class="text-xs text-slate-400 mt-1">
-              홈페이지 제작을 위한 메뉴/페이지 구조, 상·하위 관계, 병렬/직렬 구성을 설계하세요.
-            </p>
-          </div>
-          <div class="flex items-center gap-2 text-xs text-slate-400">
-            <span
-              class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60"
-              >Tailwind + JavaScript</span
-            >
-            <button
-              id="export-json"
-              class="px-3 py-1.5 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 text-[11px] transition"
-            >
-              JSON 내보내기
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- 인트로 / 입장 화면 -->
+      <!-- 통합 인트로 화면 (퀴즈 + 프로젝트 선택) -->
       <section
         id="intro-screen"
         class="flex-1 flex items-center justify-center px-4 py-10"
+        style="background: #000;"
       >
         <div
-          class="max-w-xl w-full bg-slate-900/80 border border-slate-800 rounded-2xl px-6 py-8 shadow-xl"
+          class="arcade-screen max-w-2xl w-full p-8 grid-pattern"
         >
-          <h2 class="text-lg font-semibold text-slate-50 mb-2">
-            사이트맵 기획 보드에 오신 것을 환영합니다
-          </h2>
-          <p class="text-xs text-slate-400 leading-relaxed mb-4">
-            여러 회사/프로젝트의 홈페이지 구조를 프로젝트별로 나누어 설계하고,
-            상·하위 메뉴와 URL을 한 번에 정리할 수 있는 도구입니다.
-          </p>
-          <ul class="text-[11px] text-slate-300 space-y-1 mb-6 list-disc list-inside">
-            <li>좌측에서 <span class="font-semibold">작업 프로젝트</span>를 선택하거나 새로 만듭니다.</li>
-            <li>페이지별 <span class="font-semibold">제목 · URL · 상위 메뉴 · 요약</span>을 입력합니다.</li>
-            <li>우측에서 <span class="font-semibold">사이트맵 구조</span>와 <span class="font-semibold">페이지 목록</span>을 함께 확인합니다.</li>
-            <li>완료되면 상단의 <span class="font-semibold">JSON 내보내기</span> 버튼으로 결과를 파일로 저장하세요.</li>
-          </ul>
-          <div class="flex items-center justify-between gap-3">
-            <button
-              id="start-default-project"
-              class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium px-3 py-2 text-xs transition"
-            >
-              기본 프로젝트로 시작하기
-            </button>
-            <button
-              id="start-new-project"
-              class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-100 px-3 py-2 text-xs transition"
-            >
-              새 프로젝트 만들기
-            </button>
+          <!-- 게임 타이틀 -->
+          <div class="text-center mb-8">
+            <h1 class="arcade-title pixel-font neon-green mb-4 blink">
+              ════════════════
+              <br>
+              SITEMAP PLANNER
+              <br>
+              ════════════════
+            </h1>
+            <p class="arcade-subtitle pixel-font neon-blue mb-2">
+              ACCESS CONTROL SYSTEM
+            </p>
+            <p class="arcade-subtitle pixel-font neon-pink">
+              v1.0
+            </p>
+          </div>
+
+          <!-- 퀴즈 섹션 -->
+          <div id="quiz-section" class="space-y-6">
+            <!-- 질문 박스 -->
+            <div class="border-4 border-cyan-500 bg-black/50 p-6" style="box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.8);">
+              <div class="mb-6">
+                <p class="arcade-subtitle pixel-font neon-yellow mb-4" style="font-size: 10px;">
+                  [ 質問 ]
+                </p>
+                <p class="pixel-font neon-yellow mb-2" style="font-size: 16px; line-height: 2;">
+                  私が働いている場所は？
+                </p>
+              </div>
+              
+              <!-- 입력 필드 -->
+              <div class="mb-4">
+                <p class="arcade-subtitle pixel-font neon-pink mb-2" style="font-size: 8px;">
+                  [ ANSWER ]
+                </p>
+                <input
+                  type="text"
+                  id="quiz-answer"
+                  placeholder="TYPE ANSWER..."
+                  class="pixel-input w-full"
+                  autocomplete="off"
+                  style="font-size: 12px;"
+                />
+                <p id="quiz-error" class="mt-3 arcade-subtitle pixel-font neon-pink hidden blink" style="font-size: 8px;">
+                  ✗ WRONG ANSWER! TRY AGAIN!
+                </p>
+              </div>
+
+              <!-- 버튼 -->
+              <div class="flex justify-center">
+                <button
+                  id="quiz-submit"
+                  class="pixel-button"
+                >
+                  [ START ]
+                </button>
+              </div>
+            </div>
+
+            <!-- 게임 정보 -->
+            <div class="text-center">
+              <p class="arcade-subtitle pixel-font neon-blue" style="font-size: 8px; opacity: 0.7;">
+                PRESS ENTER TO SUBMIT
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- 메인 작업 영역 -->
-      <main id="app-shell" class="flex-1 hidden">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex gap-4">
+      <main id="app-shell" class="flex-1 hidden flex flex-col">
+        <!-- 헤더 -->
+        <header
+          class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20"
+        >
+          <div
+            class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-xl font-semibold tracking-tight">
+                사이트맵 기획 보드
+              </h1>
+              <p class="text-xs text-slate-400 mt-1">
+                홈페이지 제작을 위한 메뉴/페이지 구조, 상·하위 관계, 병렬/직렬 구성을 설계하세요.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <span
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60"
+                >Tailwind + JavaScript</span
+              >
+              <button
+                id="export-json"
+                class="px-3 py-1.5 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 text-[11px] transition"
+              >
+                JSON 내보내기
+              </button>
+            </div>
+          </div>
+        </header>
+        <div class="max-w-6xl mx-auto px-4 py-4 flex gap-4 flex-1">
           <!-- 좌측: 입력 사이드바 -->
           <aside
             class="w-72 lg:w-80 shrink-0 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 sticky top-20 self-start"
@@ -128,12 +366,22 @@
                     새 프로젝트
                   </button>
                 </div>
-                <div class="flex flex-wrap gap-1">
-                  <span
-                    class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap gap-1 flex-1">
+                    <span
+                      class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                    >
+                      <span id="current-project-label">기본 프로젝트</span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    id="delete-project-button"
+                    class="px-2 py-1 rounded-lg border border-rose-600/70 bg-rose-900/60 hover:bg-rose-800 text-rose-100 text-[11px] transition"
+                    title="현재 프로젝트 삭제"
                   >
-                    <span id="current-project-label">기본 프로젝트</span>
-                  </span>
+                    삭제
+                  </button>
                 </div>
               </div>
             </div>
@@ -199,7 +447,7 @@
               </div>
 
               <!-- 버튼 -->
-              <div class="flex flex-wrap items-center justify-between gap-2 mt-1">
+              <div class="flex flex-col gap-2 mt-1">
                 <div class="flex gap-2">
                   <button
                     type="submit"
@@ -223,6 +471,13 @@
                     페이지 삭제
                   </button>
                 </div>
+                <button
+                  type="button"
+                  id="save-project-button"
+                  class="w-full inline-flex items-center justify-center gap-1 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 px-3 py-1.5 text-xs transition"
+                >
+                  프로젝트 저장
+                </button>
               </div>
             </form>
           </aside>
@@ -328,20 +583,22 @@
       let currentProjectId = null;
       let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
 
+      const quizSection = document.getElementById("quiz-section");
+      const quizAnswerInput = document.getElementById("quiz-answer");
+      const quizSubmitBtn = document.getElementById("quiz-submit");
+      const quizErrorMsg = document.getElementById("quiz-error");
       const introScreen = document.getElementById("intro-screen");
       const appShell = document.getElementById("app-shell");
-      const startDefaultProjectBtn = document.getElementById(
-        "start-default-project"
-      );
-      const startNewProjectBtn = document.getElementById("start-new-project");
 
       const form = document.getElementById("page-form");
       const editingIdInput = document.getElementById("editing-id");
       const addButton = document.getElementById("add-button");
       const updateButton = document.getElementById("update-button");
       const deleteButton = document.getElementById("delete-button");
+      const saveProjectButton = document.getElementById("save-project-button");
       const projectSelect = document.getElementById("project-select");
       const newProjectButton = document.getElementById("new-project-button");
+      const deleteProjectButton = document.getElementById("delete-project-button");
       const currentProjectLabel = document.getElementById(
         "current-project-label"
       );
@@ -402,6 +659,119 @@
         refreshParentOptions();
         renderTable();
         renderSitemap();
+      }
+
+      // 프로젝트 삭제
+      function deleteProject() {
+        const current = getCurrentProject();
+        if (!current) {
+          alert("삭제할 프로젝트가 없습니다.");
+          return;
+        }
+
+        // 최소 1개 프로젝트는 유지
+        if (projects.length <= 1) {
+          alert("최소 1개의 프로젝트는 유지해야 합니다.");
+          return;
+        }
+
+        const projectName = current.name;
+        const pageCount = current.pages.length;
+        
+        if (!confirm(`"${projectName}" 프로젝트를 삭제하시겠습니까?\n(페이지 ${pageCount}개가 함께 삭제됩니다.)`)) {
+          return;
+        }
+
+        // 프로젝트 삭제
+        const index = projects.findIndex((p) => p.id === currentProjectId);
+        if (index >= 0) {
+          projects.splice(index, 1);
+        }
+
+        // 다른 프로젝트로 전환 (첫 번째 프로젝트)
+        if (projects.length > 0) {
+          setCurrentProject(projects[0].id);
+        } else {
+          // 프로젝트가 없으면 기본 프로젝트 생성
+          const defaultProject = createProject("기본 프로젝트");
+          setCurrentProject(defaultProject.id);
+        }
+
+        // localStorage에서도 삭제된 프로젝트 제거
+        saveProject();
+      }
+
+      // 프로젝트 저장 (localStorage)
+      function saveProject() {
+        const current = getCurrentProject();
+        if (!current) {
+          alert("저장할 프로젝트가 없습니다.");
+          return;
+        }
+
+        try {
+          // 모든 프로젝트 저장
+          const savedData = {
+            projects: projects,
+            currentProjectId: currentProjectId,
+            savedAt: new Date().toISOString()
+          };
+          localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
+          
+          // 성공 메시지
+          const originalText = saveProjectButton.textContent;
+          saveProjectButton.textContent = "저장 완료!";
+          saveProjectButton.classList.add("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+          saveProjectButton.classList.remove("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
+          
+          setTimeout(() => {
+            saveProjectButton.textContent = originalText;
+            saveProjectButton.classList.remove("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+            saveProjectButton.classList.add("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
+          }, 2000);
+        } catch (error) {
+          alert("프로젝트 저장 중 오류가 발생했습니다: " + error.message);
+        }
+      }
+
+      // 프로젝트 불러오기 (localStorage)
+      function loadProjects() {
+        try {
+          const savedData = localStorage.getItem("sitemapProjects");
+          if (!savedData) return false;
+
+          const data = JSON.parse(savedData);
+          if (data.projects && Array.isArray(data.projects)) {
+            // 기존 프로젝트 배열에 저장된 프로젝트 추가
+            data.projects.forEach(savedProject => {
+              // 중복 ID 체크
+              const exists = projects.find(p => p.id === savedProject.id);
+              if (!exists) {
+                projects.push(savedProject);
+              } else {
+                // 기존 프로젝트 업데이트 (페이지 데이터만)
+                const existing = projects.find(p => p.id === savedProject.id);
+                if (existing) {
+                  existing.pages = savedProject.pages || [];
+                  existing.name = savedProject.name || existing.name;
+                }
+              }
+            });
+
+            // 현재 프로젝트 복원
+            if (data.currentProjectId) {
+              const restored = projects.find(p => p.id === data.currentProjectId);
+              if (restored) {
+                setCurrentProject(data.currentProjectId);
+                return true;
+              }
+            }
+          }
+          return false;
+        } catch (error) {
+          console.error("프로젝트 불러오기 오류:", error);
+          return false;
+        }
       }
 
       // 폼에서 값 가져오기
@@ -987,14 +1357,28 @@
         setCurrentProject(project.id);
       });
 
+      // 프로젝트 삭제 버튼
+      deleteProjectButton.addEventListener("click", deleteProject);
+
+      // 프로젝트 저장 버튼
+      saveProjectButton.addEventListener("click", saveProject);
+
       expandAllBtn.addEventListener("click", expandAll);
       collapseAllBtn.addEventListener("click", collapseAll);
       exportJsonBtn.addEventListener("click", exportJson);
 
       // 초기 프로젝트 생성 및 렌더
       (function initProjects() {
-        const defaultProject = createProject("기본 프로젝트");
-        setCurrentProject(defaultProject.id);
+        // 저장된 프로젝트 불러오기 시도
+        const loaded = loadProjects();
+        if (!loaded) {
+          // 저장된 프로젝트가 없으면 기본 프로젝트 생성
+          const defaultProject = createProject("기본 프로젝트");
+          setCurrentProject(defaultProject.id);
+        } else {
+          // 저장된 프로젝트가 있으면 UI 갱신
+          refreshProjectSelect();
+        }
       })();
 
       // 인트로 → 메인 전환
@@ -1003,24 +1387,38 @@
         appShell.classList.remove("hidden");
       }
 
-      startDefaultProjectBtn.addEventListener("click", () => {
-        // 이미 기본 프로젝트가 선택된 상태이므로 바로 진입
-        showAppShell();
-      });
-
-      startNewProjectBtn.addEventListener("click", () => {
-        let name = prompt(
-          "새 프로젝트 이름을 입력하세요.",
-          "새 프로젝트"
-        );
-        if (name === null) return;
-        name = name.trim();
-        if (!name) {
-          name = `프로젝트 ${projects.length + 1}`;
+      // 퀴즈 정답 확인
+      function checkQuizAnswer() {
+        const answer = quizAnswerInput.value.trim();
+        const correctAnswer = "통진";
+        
+        if (answer === correctAnswer) {
+          // 정답: 바로 메인 작업 페이지로 이동
+          quizErrorMsg.classList.add("hidden");
+          quizAnswerInput.value = "";
+          showAppShell();
+        } else {
+          // 오답: 에러 메시지 표시 및 shake 효과
+          quizErrorMsg.classList.remove("hidden");
+          quizAnswerInput.classList.add("game-over");
+          quizAnswerInput.value = "";
+          quizAnswerInput.focus();
+          
+          // shake 효과 제거 (다음 입력을 위해)
+          setTimeout(() => {
+            quizAnswerInput.classList.remove("game-over");
+          }, 500);
         }
-        const project = createProject(name);
-        setCurrentProject(project.id);
-        showAppShell();
+      }
+
+      // 퀴즈 제출 버튼 클릭
+      quizSubmitBtn.addEventListener("click", checkQuizAnswer);
+
+      // 퀴즈 입력 필드에서 Enter 키 입력
+      quizAnswerInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          checkQuizAnswer();
+        }
       });
     </script>
   </body>
