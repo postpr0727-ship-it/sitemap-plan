@@ -783,6 +783,9 @@
             localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
           }
           
+          // 프로젝트 선택 목록 업데이트
+          refreshProjectSelect();
+          
           // 성공 메시지
           const originalText = saveProjectButton.textContent;
           saveProjectButton.textContent = isFirebaseConfigured ? "저장 완료! (실시간 동기화)" : "저장 완료!";
@@ -934,12 +937,14 @@
             }
           });
 
-          // 현재 프로젝트가 변경되었으면 UI 업데이트
+          // 프로젝트 목록이 변경되었으면 UI 업데이트
           if (hasChanges && !isEditing) {
+            // 프로젝트 선택 목록 갱신
+            refreshProjectSelect();
+            
             const current = getCurrentProject();
             if (current) {
               pages = current.pages;
-              refreshProjectSelect();
               refreshParentOptions();
               renderTable();
               renderSitemap();
