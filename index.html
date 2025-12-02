@@ -8,6 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cg fill='none' stroke='%2300ff00' stroke-width='2'%3E%3Cpath d='M16 4 L16 12 M8 12 L16 12 L24 12 M8 12 L8 20 M24 12 L24 20 M8 20 L8 28 M24 20 L24 28'/%3E%3C/g%3E%3Ccircle cx='16' cy='4' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='28' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='28' r='2' fill='%2300ff00'/%3E%3C/svg%3E" />
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <!-- 픽셀 폰트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -324,6 +327,11 @@
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400">
               <span
+                id="firebase-status"
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60 hidden"
+                title="Firebase 연결 상태"
+              ></span>
+              <span
                 class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60"
                 >Tailwind + JavaScript</span
               >
@@ -580,10 +588,58 @@
     </div>
 
     <script>
+      // ============================================
+      // Firebase 설정
+      // ============================================
+      // 실시간 동기화를 사용하려면 Firebase 설정이 필요합니다.
+      //
+      // 설정 방법:
+      // 1. Firebase Console (https://console.firebase.google.com) 접속
+      // 2. 새 프로젝트 생성 또는 기존 프로젝트 선택
+      // 3. 왼쪽 메뉴에서 "Realtime Database" 선택
+      // 4. "데이터베이스 만들기" 클릭
+      // 5. "테스트 모드에서 시작" 선택 (개발용)
+      // 6. 프로젝트 설정(톱니바퀴 아이콘) > 일반 탭에서
+      //    웹 앱 추가 후 나타나는 설정 정보를 아래에 입력하세요.
+      //
+      // 참고: Firebase 설정이 없어도 localStorage로 작동합니다.
+      //       하지만 다른 웹에서 실시간 동기화를 하려면 Firebase 설정이 필요합니다.
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      // Firebase 초기화
+      let database = null;
+      let isFirebaseConfigured = false;
+      
+      try {
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+          firebase.initializeApp(firebaseConfig);
+          database = firebase.database();
+          isFirebaseConfigured = true;
+          console.log("Firebase가 성공적으로 초기화되었습니다.");
+        } else {
+          console.warn("Firebase 설정이 필요합니다. localStorage를 사용합니다.");
+        }
+      } catch (error) {
+        console.error("Firebase 초기화 오류:", error);
+        console.warn("localStorage를 사용합니다.");
+      }
+
+      // Firebase 데이터베이스 경로
+      const DB_PATH = "sitemapProjects";
+
       // 프로젝트 & 페이지 데이터 저장용 메모리
       const projects = [];
       let currentProjectId = null;
       let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
+      let firebaseListener = null; // 실시간 리스너 참조
 
       const quizSection = document.getElementById("quiz-section");
       const quizAnswerInput = document.getElementById("quiz-answer");
@@ -611,6 +667,7 @@
       const expandAllBtn = document.getElementById("expand-all");
       const collapseAllBtn = document.getElementById("collapse-all");
       const exportJsonBtn = document.getElementById("export-json");
+      const firebaseStatus = document.getElementById("firebase-status");
 
       // 간단한 ID 생성
       const createId = () =>
@@ -699,12 +756,12 @@
           setCurrentProject(defaultProject.id);
         }
 
-        // localStorage에서도 삭제된 프로젝트 제거
+        // Firebase 또는 localStorage에서도 삭제된 프로젝트 제거
         saveProject();
       }
 
-      // 프로젝트 저장 (localStorage)
-      function saveProject() {
+      // 프로젝트 저장 (Firebase 또는 localStorage)
+      async function saveProject() {
         const current = getCurrentProject();
         if (!current) {
           alert("저장할 프로젝트가 없습니다.");
@@ -718,11 +775,19 @@
             currentProjectId: currentProjectId,
             savedAt: new Date().toISOString()
           };
-          localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
+
+          if (isFirebaseConfigured && database) {
+            // Firebase에 저장
+            await database.ref(DB_PATH).set(savedData);
+            console.log("Firebase에 저장 완료");
+          } else {
+            // localStorage에 저장 (백업)
+            localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
+          }
           
           // 성공 메시지
           const originalText = saveProjectButton.textContent;
-          saveProjectButton.textContent = "저장 완료!";
+          saveProjectButton.textContent = isFirebaseConfigured ? "저장 완료! (실시간 동기화)" : "저장 완료!";
           saveProjectButton.classList.add("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
           saveProjectButton.classList.remove("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
           
@@ -732,17 +797,49 @@
             saveProjectButton.classList.add("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
           }, 2000);
         } catch (error) {
+          console.error("저장 오류:", error);
           alert("프로젝트 저장 중 오류가 발생했습니다: " + error.message);
         }
       }
 
-      // 프로젝트 불러오기 (localStorage)
-      function loadProjects() {
-        try {
-          const savedData = localStorage.getItem("sitemapProjects");
-          if (!savedData) return false;
+      // 자동 저장 (페이지 추가/수정/삭제 시)
+      async function autoSave() {
+        if (isFirebaseConfigured && database) {
+          try {
+            const savedData = {
+              projects: projects,
+              currentProjectId: currentProjectId,
+              savedAt: new Date().toISOString()
+            };
+            await database.ref(DB_PATH).set(savedData);
+            console.log("자동 저장 완료");
+          } catch (error) {
+            console.error("자동 저장 오류:", error);
+          }
+        }
+      }
 
-          const data = JSON.parse(savedData);
+      // 프로젝트 불러오기 (Firebase 또는 localStorage)
+      async function loadProjects() {
+        try {
+          let data = null;
+
+          if (isFirebaseConfigured && database) {
+            // Firebase에서 불러오기
+            const snapshot = await database.ref(DB_PATH).once('value');
+            if (snapshot.exists()) {
+              data = snapshot.val();
+            }
+          } else {
+            // localStorage에서 불러오기
+            const savedData = localStorage.getItem("sitemapProjects");
+            if (savedData) {
+              data = JSON.parse(savedData);
+            }
+          }
+
+          if (!data) return false;
+
           if (data.projects && Array.isArray(data.projects)) {
             // 기존 프로젝트 배열에 저장된 프로젝트 추가
             data.projects.forEach(savedProject => {
@@ -774,6 +871,74 @@
           console.error("프로젝트 불러오기 오류:", error);
           return false;
         }
+      }
+
+      // Firebase 실시간 동기화 리스너 설정
+      function setupRealtimeSync() {
+        if (!isFirebaseConfigured || !database) {
+          return;
+        }
+
+        // 기존 리스너 제거
+        if (firebaseListener) {
+          database.ref(DB_PATH).off('value', firebaseListener);
+        }
+
+        // 실시간 리스너 추가
+        firebaseListener = database.ref(DB_PATH).on('value', (snapshot) => {
+          if (!snapshot.exists()) return;
+
+          const data = snapshot.val();
+          if (!data || !data.projects) return;
+
+          // 현재 편집 중인 페이지가 있으면 업데이트하지 않음 (충돌 방지)
+          const isEditing = editingIdInput.value !== "";
+
+          // 프로젝트 데이터 동기화
+          const remoteProjects = data.projects || [];
+          let hasChanges = false;
+
+          remoteProjects.forEach(remoteProject => {
+            const localProject = projects.find(p => p.id === remoteProject.id);
+            
+            if (!localProject) {
+              // 새 프로젝트 추가
+              projects.push(remoteProject);
+              hasChanges = true;
+            } else {
+              // 프로젝트 업데이트 (편집 중이 아닐 때만)
+              if (!isEditing && JSON.stringify(localProject.pages) !== JSON.stringify(remoteProject.pages)) {
+                localProject.pages = remoteProject.pages || [];
+                localProject.name = remoteProject.name || localProject.name;
+                hasChanges = true;
+              }
+            }
+          });
+
+          // 현재 프로젝트가 변경되었으면 UI 업데이트
+          if (hasChanges && !isEditing) {
+            const current = getCurrentProject();
+            if (current) {
+              pages = current.pages;
+              refreshProjectSelect();
+              refreshParentOptions();
+              renderTable();
+              renderSitemap();
+            }
+          }
+
+          // 현재 프로젝트 ID 동기화
+          if (data.currentProjectId && data.currentProjectId !== currentProjectId) {
+            const targetProject = projects.find(p => p.id === data.currentProjectId);
+            if (targetProject && !isEditing) {
+              setCurrentProject(data.currentProjectId);
+            }
+          }
+        }, (error) => {
+          console.error("Firebase 실시간 동기화 오류:", error);
+        });
+
+        console.log("Firebase 실시간 동기화가 활성화되었습니다.");
       }
 
       // 폼에서 값 가져오기
@@ -1244,6 +1409,9 @@
         refreshParentOptions();
         renderTable();
         renderSitemap();
+        
+        // 자동 저장
+        autoSave();
       }
 
       // 전체 펼치기 / 접기 (간단 구현: 접기는 최상위만, 펼치기는 모두 표시)
@@ -1305,6 +1473,9 @@
         renderTable();
         renderSitemap();
         resetForm();
+        
+        // 자동 저장
+        autoSave();
       });
 
       // 페이지 수정
@@ -1327,6 +1498,9 @@
         renderTable();
         renderSitemap();
         resetForm();
+        
+        // 자동 저장
+        autoSave();
       });
 
       // 페이지 삭제 (선택된 페이지 기준, 기존 삭제 로직 재사용)
@@ -1357,6 +1531,9 @@
         }
         const project = createProject(name);
         setCurrentProject(project.id);
+        
+        // 자동 저장
+        autoSave();
       });
 
       // 프로젝트 삭제 버튼
@@ -1370,9 +1547,9 @@
       exportJsonBtn.addEventListener("click", exportJson);
 
       // 초기 프로젝트 생성 및 렌더
-      (function initProjects() {
+      (async function initProjects() {
         // 저장된 프로젝트 불러오기 시도
-        const loaded = loadProjects();
+        const loaded = await loadProjects();
         if (!loaded) {
           // 저장된 프로젝트가 없으면 기본 프로젝트 생성
           const defaultProject = createProject("기본 프로젝트");
@@ -1381,7 +1558,32 @@
           // 저장된 프로젝트가 있으면 UI 갱신
           refreshProjectSelect();
         }
+
+        // Firebase 실시간 동기화 설정
+        if (isFirebaseConfigured) {
+          setupRealtimeSync();
+          updateFirebaseStatus(true);
+        } else {
+          updateFirebaseStatus(false);
+        }
       })();
+
+      // Firebase 상태 표시 업데이트
+      function updateFirebaseStatus(connected) {
+        if (!firebaseStatus) return;
+        
+        if (connected) {
+          firebaseStatus.textContent = "🟢 실시간 동기화";
+          firebaseStatus.classList.remove("hidden", "border-slate-700", "bg-slate-900/60");
+          firebaseStatus.classList.add("border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
+          firebaseStatus.title = "Firebase 실시간 동기화 활성화됨";
+        } else {
+          firebaseStatus.textContent = "⚪ 로컬 저장";
+          firebaseStatus.classList.remove("hidden", "border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
+          firebaseStatus.classList.add("border-slate-700", "bg-slate-900/60");
+          firebaseStatus.title = "Firebase가 설정되지 않음. localStorage를 사용합니다.";
+        }
+      }
 
       // 인트로 → 메인 전환
       function showAppShell() {
