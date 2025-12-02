@@ -589,29 +589,22 @@
 
     <script>
       // ============================================
-      // Firebase 설정
+      // Firebase 설정 (간단 버전)
       // ============================================
-      // 실시간 동기화를 사용하려면 Firebase 설정이 필요합니다.
+      // 1. https://console.firebase.google.com 접속 → 프로젝트 만들기
+      // 2. 빌드 > Realtime Database > 데이터베이스 만들기 (테스트 모드)
+      // 3. 톱니바퀴 아이콘 > 프로젝트 설정 > 웹 앱 추가 > 설정 정보 복사
+      // 4. 아래 firebaseConfig에 붙여넣기
       //
-      // 설정 방법:
-      // 1. Firebase Console (https://console.firebase.google.com) 접속
-      // 2. 새 프로젝트 생성 또는 기존 프로젝트 선택
-      // 3. 왼쪽 메뉴에서 "Realtime Database" 선택
-      // 4. "데이터베이스 만들기" 클릭
-      // 5. "테스트 모드에서 시작" 선택 (개발용)
-      // 6. 프로젝트 설정(톱니바퀴 아이콘) > 일반 탭에서
-      //    웹 앱 추가 후 나타나는 설정 정보를 아래에 입력하세요.
-      //
-      // 참고: Firebase 설정이 없어도 localStorage로 작동합니다.
-      //       하지만 다른 웹에서 실시간 동기화를 하려면 Firebase 설정이 필요합니다.
+      // 자세한 가이드: FIREBASE_SETUP.md 파일 참고
       const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyBtYMv7SLwLFybFaE81nfJ8kYMySGKd9cs",
+        authDomain: "sitemap-9177c.firebaseapp.com",
+        databaseURL: "https://sitemap-9177c-default-rtdb.firebaseio.com",
+        projectId: "sitemap-9177c",
+        storageBucket: "sitemap-9177c.firebasestorage.app",
+        messagingSenderId: "806332670610",
+        appId: "1:806332670610:web:5c2ab54730b40d53503c4b"
       };
 
       // Firebase 초기화
@@ -718,6 +711,11 @@
         refreshParentOptions();
         renderTable();
         renderSitemap();
+        
+        // 프로젝트 전환 시 자동 저장 (Firebase 사용 시)
+        if (isFirebaseConfigured) {
+          autoSave();
+        }
       }
 
       // 프로젝트 삭제
@@ -819,19 +817,40 @@
         }
       }
 
-      // 프로젝트 불러오기 (Firebase 또는 localStorage)
+      // 프로젝트 불러오기 (Firebase 우선, 없으면 localStorage)
       async function loadProjects() {
         try {
           let data = null;
 
           if (isFirebaseConfigured && database) {
-            // Firebase에서 불러오기
-            const snapshot = await database.ref(DB_PATH).once('value');
-            if (snapshot.exists()) {
-              data = snapshot.val();
+            // Firebase에서 불러오기 (우선)
+            try {
+              const snapshot = await database.ref(DB_PATH).once('value');
+              if (snapshot.exists()) {
+                data = snapshot.val();
+                console.log("Firebase에서 프로젝트 불러오기 완료");
+              } else {
+                console.log("Firebase에 저장된 데이터가 없습니다.");
+                // Firebase에 데이터가 없으면 localStorage 확인
+                const savedData = localStorage.getItem("sitemapProjects");
+                if (savedData) {
+                  data = JSON.parse(savedData);
+                  console.log("localStorage에서 프로젝트 불러오기 완료");
+                  // localStorage 데이터를 Firebase에 동기화
+                  await autoSave();
+                }
+              }
+            } catch (firebaseError) {
+              console.error("Firebase 불러오기 오류:", firebaseError);
+              // Firebase 오류 시 localStorage 사용
+              const savedData = localStorage.getItem("sitemapProjects");
+              if (savedData) {
+                data = JSON.parse(savedData);
+                console.log("Firebase 오류로 localStorage에서 불러오기");
+              }
             }
           } else {
-            // localStorage에서 불러오기
+            // Firebase가 설정되지 않았으면 localStorage에서 불러오기
             const savedData = localStorage.getItem("sitemapProjects");
             if (savedData) {
               data = JSON.parse(savedData);
@@ -927,11 +946,18 @@
             }
           }
 
-          // 현재 프로젝트 ID 동기화
-          if (data.currentProjectId && data.currentProjectId !== currentProjectId) {
+          // 현재 프로젝트 ID 동기화 (다른 브라우저에서 프로젝트 전환 시)
+          if (data.currentProjectId && data.currentProjectId !== currentProjectId && !isEditing) {
             const targetProject = projects.find(p => p.id === data.currentProjectId);
-            if (targetProject && !isEditing) {
-              setCurrentProject(data.currentProjectId);
+            if (targetProject) {
+              // setCurrentProject를 호출하지 않고 직접 전환 (무한 루프 방지)
+              currentProjectId = data.currentProjectId;
+              pages = targetProject.pages;
+              refreshProjectSelect();
+              refreshParentOptions();
+              renderTable();
+              renderSitemap();
+              resetForm();
             }
           }
         }, (error) => {
