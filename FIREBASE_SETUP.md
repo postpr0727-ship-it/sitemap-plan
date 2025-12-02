@@ -13,6 +13,22 @@
 3. 왼쪽 메뉴: **빌드** → **Realtime Database** → **데이터베이스 만들기**
 4. 위치 선택 (서울 권장) → **테스트 모드에서 시작** → **사용 설정**
 
+### 1-1. ⚠️ 보안 규칙 설정 (중요!)
+1. Firebase Console에서 **Realtime Database** 메뉴 클릭
+2. 상단 탭에서 **"규칙"** 클릭
+3. 다음 규칙으로 교체:
+```json
+{
+  "rules": {
+    "sitemapProjects": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
+```
+4. **"게시"** 버튼 클릭
+
 ### 2️⃣ 설정 정보 가져오기
 1. 왼쪽 상단 **톱니바퀴 아이콘** → **프로젝트 설정**
 2. 아래로 스크롤 → **웹 아이콘 `</>`** 클릭
@@ -51,6 +67,13 @@
 
 **실시간 동기화가 안 돼요**
 → Firebase Console에서 Realtime Database가 활성화되어 있는지 확인하세요.
+
+**"PERMISSION_DENIED: Permission denied" 오류가 나와요** ⚠️
+→ **가장 흔한 오류입니다!** Firebase Console에서:
+1. **Realtime Database** → **규칙** 탭으로 이동
+2. 위의 "1-1. 보안 규칙 설정" 단계를 따라하세요
+3. `sitemapProjects` 경로에 읽기/쓰기 권한을 허용해야 합니다
+4. 규칙을 수정한 후 **"게시"** 버튼 클릭
 
 ---
 
