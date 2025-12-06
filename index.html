@@ -6,314 +6,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- 파비콘 -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cg fill='none' stroke='%2300ff00' stroke-width='2'%3E%3Cpath d='M16 4 L16 12 M8 12 L16 12 L24 12 M8 12 L8 20 M24 12 L24 20 M8 20 L8 28 M24 20 L24 28'/%3E%3C/g%3E%3Ccircle cx='16' cy='4' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='28' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='28' r='2' fill='%2300ff00'/%3E%3C/svg%3E" />
-    <!-- Semantic UI CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <!-- jQuery (Semantic UI 의존성) -->
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <!-- Semantic UI JS -->
-    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+    <!-- 픽셀 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-      body {
-        background-color: #f9fafb;
+      /* 스크롤바 최소화 */
+      * {
+        scrollbar-width: thin;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.8);
+        border-radius: 999px;
+      }
+      ::-webkit-scrollbar-track {
+        background-color: transparent;
       }
     </style>
   </head>
-  <body>
-    <div class="ui container" style="min-height: 100vh; padding: 2rem 0;">
+  <body class="min-h-screen bg-black text-slate-100" style="background: #000;">
+    <div class="min-h-screen flex flex-col">
       <!-- 메인 작업 영역 -->
-      <main id="app-shell">
+      <main id="app-shell" class="flex-1 flex flex-col">
         <!-- 헤더 -->
-        <header class="ui sticky top menu" style="margin-bottom: 2rem;">
-          <div class="ui container">
-            <div class="header item">
-              <h2 class="ui header">
-                <i class="sitemap icon"></i>
-                <div class="content">
-                  사이트맵 기획 보드
-                  <div class="sub header">홈페이지 제작을 위한 메뉴/페이지 구조, 상·하위 관계, 병렬/직렬 구성을 설계하세요.</div>
-                </div>
-              </h2>
+        <header
+          class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-20"
+        >
+          <div
+            class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-xl font-semibold tracking-tight">
+                사이트맵 기획 보드
+              </h1>
+              <p class="text-xs text-slate-400 mt-1">
+                홈페이지 제작을 위한 메뉴/페이지 구조, 상·하위 관계, 병렬/직렬 구성을 설계하세요.
+              </p>
             </div>
-            <div class="right menu">
-              <div class="item">
-                <span
-                  id="firebase-status"
-                  class="ui label hidden"
-                  title="Firebase 연결 상태"
-                ></span>
-                <span class="ui label">
-                  <i class="code icon"></i>
-                  Semantic UI + JavaScript
-                </span>
-                <button
-                  id="export-json"
-                  class="ui blue button"
-                >
-                  <i class="download icon"></i>
-                  JSON 내보내기
-                </button>
-              </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <span
+                id="firebase-status"
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60 hidden"
+                title="Firebase 연결 상태"
+              ></span>
+              <span
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60"
+                >Tailwind + JavaScript</span
+              >
+              <button
+                id="export-json"
+                class="px-3 py-1.5 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 text-[11px] transition"
+              >
+                JSON 내보내기
+              </button>
             </div>
           </div>
         </header>
-        <div class="ui container">
-          <div class="ui grid">
-            <!-- 좌측: 입력 사이드바 -->
-            <div class="four wide column">
-              <div class="ui raised segment" style="position: sticky; top: 80px;">
-                <!-- 입력 폼 -->
-                <div class="ui form">
-                  <h3 class="ui dividing header">
-                    <i class="edit icon"></i>
-                    페이지 정보 입력
-                  </h3>
-                  <!-- 프로젝트 선택 -->
-                  <div class="field">
-                    <label>작업 프로젝트</label>
-                    <select
-                      id="project-select"
-                      class="ui dropdown"
-                    >
-                      <!-- JS에서 채움 -->
-                    </select>
-                  </div>
-                  <div class="field">
-                    <div class="ui fluid buttons">
-                      <div class="ui label" style="flex: 1; margin-right: 0.5rem;">
-                        <i class="folder icon"></i>
-                        <span id="current-project-label">기본 프로젝트</span>
-                      </div>
-                      <button
-                        type="button"
-                        id="new-project-button"
-                        class="ui button"
-                      >
-                        <i class="plus icon"></i>
-                        새 프로젝트
-                      </button>
-                      <button
-                        type="button"
-                        id="delete-project-button"
-                        class="ui red button"
-                        title="현재 프로젝트 삭제"
-                      >
-                        <i class="trash icon"></i>
-                        삭제
-                      </button>
-                    </div>
-                  </div>
+        <div class="max-w-6xl mx-auto px-4 py-4 flex gap-4 flex-1">
+          <!-- 좌측: 입력 사이드바 -->
+          <aside
+            class="w-72 lg:w-80 shrink-0 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 sticky top-20 self-start"
+          >
+            <!-- 입력 폼 -->
+            <div class="flex flex-col gap-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-semibold text-slate-100">
+                  페이지 정보 입력
+                </h2>
+              </div>
+              <!-- 프로젝트 선택 -->
+              <div class="flex flex-col gap-1 text-[11px] text-slate-400">
+                <div class="flex items-center gap-2">
+                  <label for="project-select" class="whitespace-nowrap"
+                    >작업 프로젝트</label
+                  >
+                  <select
+                    id="project-select"
+                    class="flex-1 rounded-lg border border-slate-700 bg-slate-900/70 px-2 py-1 text-[11px] focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                  >
+                    <!-- JS에서 채움 -->
+                  </select>
                 </div>
+                <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap gap-1 flex-1">
+                    <span
+                      class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                    >
+                      <span id="current-project-label">기본 프로젝트</span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    id="new-project-button"
+                    class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-[11px] text-slate-200"
+                  >
+                    새 프로젝트
+                  </button>
+                  <button
+                    type="button"
+                    id="delete-project-button"
+                    class="px-2 py-1 rounded-lg border border-rose-600/70 bg-rose-900/60 hover:bg-rose-800 text-rose-100 text-[11px] transition"
+                    title="현재 프로젝트 삭제"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                <form
-                  id="page-form"
-                  class="ui form"
+            <form
+              id="page-form"
+              class="flex flex-col gap-3 text-xs"
+            >
+              <input type="hidden" id="editing-id" />
+
+              <!-- 페이지 제목 -->
+              <div>
+                <label class="block mb-1 text-slate-300">페이지 제목</label>
+                <input
+                  type="text"
+                  id="title"
+                  required
+                  placeholder="예) 회사소개, 서비스 소개, 문의하기"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                />
+              </div>
+
+              <!-- URL 주소 -->
+              <div>
+                <label class="block mb-1 text-slate-300">URL 주소</label>
+                <div class="flex items-center gap-1">
+                  <span
+                    class="px-2 py-1 rounded-lg bg-slate-900/80 border border-slate-700 text-[11px] text-slate-400"
+                    >/</span
+                  >
+                  <input
+                    type="text"
+                    id="url"
+                    placeholder="about, service, contact 등"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                  />
+                </div>
+              </div>
+
+              <!-- 상위 메뉴 -->
+              <div>
+                <label class="block mb-1 text-slate-300">상위 메뉴</label>
+                <select
+                  id="parent-id"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
                 >
-                  <input type="hidden" id="editing-id" />
-
-                  <!-- 페이지 제목 -->
-                  <div class="field">
-                    <label>페이지 제목</label>
-                    <input
-                      type="text"
-                      id="title"
-                      required
-                      placeholder="예) 회사소개, 서비스 소개, 문의하기"
-                    />
-                  </div>
-
-                  <!-- URL 주소 -->
-                  <div class="field">
-                    <label>URL 주소</label>
-                    <div class="ui right labeled input">
-                      <div class="ui label">/</div>
-                      <input
-                        type="text"
-                        id="url"
-                        placeholder="about, service, contact 등"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- 상위 메뉴 -->
-                  <div class="field">
-                    <label>상위 메뉴</label>
-                    <select
-                      id="parent-id"
-                      class="ui dropdown"
-                    >
-                      <option value="">(최상위 메뉴)</option>
-                    </select>
-                    <div class="ui pointing label">
-                      상위 메뉴를 선택하면 선택한 메뉴의 하위 페이지로 구성됩니다.
-                    </div>
-                  </div>
-
-                  <!-- 요약/설명 -->
-                  <div class="field">
-                    <label>페이지 내용 요약</label>
-                    <textarea
-                      id="description"
-                      rows="3"
-                      placeholder="페이지의 주요 목적, 핵심 콘텐츠, 타겟 사용자 등을 간단히 작성하세요."
-                    ></textarea>
-                  </div>
-
-                  <!-- 버튼 -->
-                  <div class="ui buttons fluid">
-                    <button
-                      type="submit"
-                      id="add-button"
-                      class="ui green button"
-                    >
-                      <i class="plus icon"></i>
-                      페이지 추가
-                    </button>
-                    <button
-                      type="button"
-                      id="update-button"
-                      class="ui orange button disabled"
-                    >
-                      <i class="edit icon"></i>
-                      페이지 수정
-                    </button>
-                    <button
-                      type="button"
-                      id="delete-button"
-                      class="ui red button disabled"
-                    >
-                      <i class="trash icon"></i>
-                      페이지 삭제
-                    </button>
-                  </div>
-                  <div style="margin-top: 0.5rem;">
-                    <button
-                      type="button"
-                      id="save-project-button"
-                      class="ui blue button fluid"
-                    >
-                      <i class="save icon"></i>
-                      프로젝트 저장
-                    </button>
-                  </div>
-                </form>
+                  <option value="">(최상위 메뉴)</option>
+                </select>
+                <p class="mt-1 text-[11px] text-slate-500">
+                  상위 메뉴를 선택하면 선택한 메뉴의 하위 페이지로 구성됩니다.
+                </p>
               </div>
-            </div>
 
-            <!-- 우측: 목록 + 구조 미리보기 -->
-            <div class="twelve wide column">
-              <!-- 입력된 페이지 리스트 -->
-              <div class="ui raised segment">
-                <div class="ui grid">
-                  <div class="row">
-                    <div class="column">
-                      <h3 class="ui header">
-                        <i class="list icon"></i>
-                        <div class="content">
-                          페이지 목록
-                          <div class="ui label" id="page-count">0개 페이지</div>
-                        </div>
-                      </h3>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="column">
-                      <div style="max-height: 300px; overflow-y: auto;">
-                        <table class="ui celled table">
-                          <thead>
-                            <tr>
-                              <th style="width: 60px;">레벨</th>
-                              <th>제목</th>
-                              <th style="width: 150px;">URL</th>
-                              <th style="width: 120px; text-align: right;">액션</th>
-                            </tr>
-                          </thead>
-                          <tbody id="page-table-body">
-                            <tr>
-                              <td colspan="4" class="center aligned">
-                                아직 추가된 페이지가 없습니다. 좌측에서 페이지를 추가하세요.
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
+              <!-- 요약/설명 -->
+              <div>
+                <label class="block mb-1 text-slate-300">페이지 내용 요약</label>
+                <textarea
+                  id="description"
+                  rows="3"
+                  placeholder="페이지의 주요 목적, 핵심 콘텐츠, 타겟 사용자 등을 간단히 작성하세요."
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                ></textarea>
+              </div>
+
+              <!-- 버튼 -->
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    id="add-button"
+                    class="inline-flex items-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium px-3 py-1.5 text-xs transition"
+                  >
+                    페이지 추가
+                  </button>
+                  <button
+                    type="button"
+                    id="update-button"
+                    class="inline-flex items-center gap-1 rounded-lg border border-amber-500/60 bg-amber-500/10 text-amber-200 px-3 py-1.5 text-xs transition opacity-40 cursor-not-allowed"
+                  >
+                    페이지 수정
+                  </button>
+                  <button
+                    type="button"
+                    id="delete-button"
+                    class="inline-flex items-center gap-1 rounded-lg border border-rose-600/70 bg-rose-900/60 hover:bg-rose-800 text-rose-100 px-3 py-1.5 text-xs transition opacity-40 cursor-not-allowed"
+                  >
+                    페이지 삭제
+                  </button>
                 </div>
+                <button
+                  type="button"
+                  id="save-project-button"
+                  class="w-full inline-flex items-center justify-center gap-1 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 px-3 py-1.5 text-xs transition"
+                >
+                  프로젝트 저장
+                </button>
               </div>
+            </form>
+          </aside>
 
-              <!-- 구조 미리보기 -->
-              <div class="ui raised segment" style="margin-top: 1rem;">
-                <div class="ui grid">
-                  <div class="row">
-                    <div class="column">
-                      <div class="ui header">
-                        <i class="sitemap icon"></i>
-                        <div class="content">
-                          사이트맵 구조 미리보기
-                          <div class="ui buttons" style="float: right;">
-                            <button
-                              id="expand-all"
-                              class="ui button"
-                            >
-                              <i class="expand icon"></i>
-                              전체 펼치기
-                            </button>
-                            <button
-                              id="collapse-all"
-                              class="ui button"
-                            >
-                              <i class="compress icon"></i>
-                              전체 접기
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="column">
-                      <div class="ui info message">
-                        <ul class="list">
-                          <li>박스 간 세로 줄기는 상·하위(계층) 관계를 의미합니다.</li>
-                          <li>같은 레벨에서 직렬(순차) 그룹은 번호로 이어지며, 병렬 그룹은 가로로 나란히 배치됩니다.</li>
-                          <li>각 박스를 클릭하면 해당 페이지가 편집 모드로 전환됩니다.</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="column">
-                      <div
-                        id="sitemap-container"
-                        style="min-height: 300px; max-height: 500px; overflow: auto; padding: 1rem; background: #f9fafb; border: 1px dashed #ddd; border-radius: 4px;"
+          <!-- 우측: 목록 + 구조 미리보기 -->
+          <section class="flex-1 flex flex-col gap-4">
+            <!-- 입력된 페이지 리스트 -->
+            <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-slate-200">
+                  페이지 목록
+                </h3>
+                <span
+                  id="page-count"
+                  class="text-[11px] text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded-full border border-slate-700"
+                  >0개 페이지</span
+                >
+              </div>
+              <div
+                class="max-h-64 lg:max-h-72 overflow-auto rounded-xl border border-slate-800 bg-slate-950/40"
+              >
+                <table class="w-full text-[11px]">
+                  <thead class="bg-slate-900/80 text-slate-400 sticky top-0 z-10">
+                    <tr>
+                      <th class="px-3 py-2 text-left font-medium w-10">레벨</th>
+                      <th class="px-3 py-2 text-left font-medium">제목</th>
+                      <th class="px-3 py-2 text-left font-medium w-24">
+                        URL
+                      </th>
+                      <th class="px-3 py-2 text-right font-medium w-20">
+                        액션
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="page-table-body" class="divide-y divide-slate-800">
+                    <tr>
+                      <td
+                        colspan="4"
+                        class="px-3 py-6 text-center text-slate-500 text-xs"
                       >
-                        <div class="ui placeholder" style="height: 100%;">
-                          <div class="line"></div>
-                          <div class="line"></div>
-                          <div class="paragraph">
-                            <div class="medium line"></div>
-                            <div class="short line"></div>
-                          </div>
-                          <div class="line"></div>
-                          <div class="line"></div>
-                          <div class="paragraph">
-                            <div class="medium line"></div>
-                            <div class="short line"></div>
-                          </div>
-                          <p style="text-align: center; margin-top: 2rem; color: #999;">
-                            좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        아직 추가된 페이지가 없습니다. 좌측에서 페이지를
+                        추가하세요.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
+
+            <!-- 구조 미리보기 -->
+            <section
+              class="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3"
+            >
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="text-sm font-semibold text-slate-100">
+                사이트맵 구조 미리보기
+              </h2>
+              <div class="flex gap-2 text-[11px] text-slate-400">
+                <button
+                  id="expand-all"
+                  class="px-2 py-0.5 rounded-lg border border-slate-700 hover:bg-slate-800"
+                >
+                  전체 펼치기
+                </button>
+                <button
+                  id="collapse-all"
+                  class="px-2 py-0.5 rounded-lg border border-slate-700 hover:bg-slate-800"
+                >
+                  전체 접기
+                </button>
+              </div>
+            </div>
+
+              <div
+                class="text-[11px] text-slate-400 bg-slate-950/50 border border-dashed border-slate-700 rounded-xl px-3 py-2"
+              >
+                - 박스 간 세로 줄기는 상·하위(계층) 관계를 의미합니다.<br />
+                - 같은 레벨에서 직렬(순차) 그룹은 번호로 이어지며, 병렬 그룹은
+                가로로 나란히 배치됩니다.<br />
+                - 각 박스를 클릭하면 해당 페이지가 편집 모드로 전환됩니다.
+              </div>
+
+              <div
+                id="sitemap-container"
+                class="flex-1 min-h-[260px] max-h-[420px] overflow-auto rounded-xl border border-slate-800 bg-gradient-to-b from-slate-950/80 to-slate-950/40 px-3 py-3"
+              >
+                <div
+                  class="h-full flex items-center justify-center text-xs text-slate-500"
+                >
+                  좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.
+                </div>
+              </div>
+
+            </section>
+          </section>
         </div>
       </main>
     </div>
@@ -416,10 +412,6 @@
         if (current) {
           currentProjectLabel.textContent = current.name;
         }
-        // Semantic UI 드롭다운 재초기화
-        if (typeof $ !== 'undefined' && $.fn.dropdown) {
-          $(projectSelect).dropdown('refresh');
-        }
       }
 
       // 프로젝트 생성
@@ -519,13 +511,13 @@
           // 성공 메시지
           const originalText = saveProjectButton.textContent;
           saveProjectButton.textContent = isFirebaseConfigured ? "저장 완료! (실시간 동기화)" : "저장 완료!";
-          saveProjectButton.classList.remove("blue");
-          saveProjectButton.classList.add("green");
+          saveProjectButton.classList.add("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+          saveProjectButton.classList.remove("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
           
           setTimeout(() => {
             saveProjectButton.textContent = originalText;
-            saveProjectButton.classList.remove("green");
-            saveProjectButton.classList.add("blue");
+            saveProjectButton.classList.remove("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+            saveProjectButton.classList.add("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
           }, 2000);
         } catch (error) {
           console.error("저장 오류:", error);
@@ -755,13 +747,14 @@
         editingIdInput.value = "";
         // 추가 버튼 기본 상태, 수정 버튼 비활성화
         addButton.disabled = false;
-        addButton.classList.remove("disabled");
+        addButton.classList.remove("opacity-40", "cursor-not-allowed");
+        addButton.classList.add("bg-emerald-500", "hover:bg-emerald-400");
 
         updateButton.disabled = true;
-        updateButton.classList.add("disabled");
+        updateButton.classList.add("opacity-40", "cursor-not-allowed");
 
         deleteButton.disabled = true;
-        deleteButton.classList.add("disabled");
+        deleteButton.classList.add("opacity-40", "cursor-not-allowed");
       }
 
       // 상위 메뉴 옵션 갱신
@@ -787,10 +780,6 @@
         // 편집 중이던 값 유지 시도
         if (previous && previous !== currentEditingId) {
           parentSelect.value = previous;
-        }
-        // Semantic UI 드롭다운 재초기화
-        if (typeof $ !== 'undefined' && $.fn.dropdown) {
-          $(parentSelect).dropdown('refresh');
         }
       }
 
@@ -853,7 +842,7 @@
         pageTableBody.innerHTML = "";
         if (!pages.length) {
           pageTableBody.innerHTML =
-            '<tr><td colspan="4" class="center aligned">아직 추가된 페이지가 없습니다. 상단 폼을 이용해 페이지를 추가하세요.</td></tr>';
+            '<tr><td colspan="4" class="px-3 py-6 text-center text-slate-500 text-xs">아직 추가된 페이지가 없습니다. 상단 폼을 이용해 페이지를 추가하세요.</td></tr>';
           pageCountBadge.textContent = "0개 페이지";
           return;
         }
@@ -869,40 +858,42 @@
 
         rows.forEach(({ node, level }) => {
           const tr = document.createElement("tr");
+          tr.className =
+            "hover:bg-slate-900/70 transition border-b border-slate-900/40 last:border-b-0";
 
           const depthBadge =
             level === 0
-              ? '<span class="ui green circular label">0</span>'
-              : `<span class="ui grey circular label">${level}</span>`;
+              ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-[10px]">0</span>'
+              : `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-800 text-slate-200 border border-slate-600 text-[10px]">${level}</span>`;
 
           const urlDisplay = node.url
             ? "/" + node.url.replace(/^\/+/, "")
             : "-";
 
           tr.innerHTML = `
-            <td>${depthBadge}</td>
-            <td>
-              <div>
-                <strong>${node.title || "(제목 없음)"}</strong>
-                <div class="ui grey text" style="font-size: 0.9em; margin-top: 0.3em;">
+            <td class="px-3 py-1.5 align-top">${depthBadge}</td>
+            <td class="px-3 py-1.5 align-top">
+              <div class="flex flex-col">
+                <span class="text-[11px] text-slate-100 font-medium">${node.title || "(제목 없음)"}</span>
+                <span class="text-[10px] text-slate-500">
                   ${(node.parentId
                     ? "하위 · " +
                       (pages.find((p) => p.id === node.parentId)?.title ||
                         "상위 메뉴")
                     : "최상위 메뉴")}
-                </div>
+                </span>
               </div>
             </td>
-            <td>
-              <code>${urlDisplay}</code>
+            <td class="px-3 py-1.5 align-top">
+              <span class="font-mono text-[10px] text-slate-200">${urlDisplay}</span>
             </td>
-            <td class="right aligned">
+            <td class="px-3 py-1.5 align-top text-right">
               <button data-id="${
                 node.id
-              }" class="ui mini blue button edit-page">편집</button>
+              }" class="edit-page text-[10px] text-sky-300 hover:text-sky-200 mr-1">편집</button>
               <button data-id="${
                 node.id
-              }" class="ui mini red button delete-page">삭제</button>
+              }" class="delete-page text-[10px] text-rose-300 hover:text-rose-200">삭제</button>
             </td>
           `;
 
@@ -933,7 +924,7 @@
         sitemapContainer.innerHTML = "";
         if (!pages.length) {
           sitemapContainer.innerHTML =
-            '<div class="ui placeholder" style="height: 100%;"><div class="line"></div><div class="line"></div><div class="paragraph"><div class="medium line"></div><div class="short line"></div></div><p style="text-align: center; margin-top: 2rem; color: #999;">좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.</p></div>';
+            '<div class="h-full flex items-center justify-center text-xs text-slate-500">좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.</div>';
           return;
         }
 
@@ -1156,10 +1147,10 @@
 
         // 수정 / 삭제 버튼 활성화
         updateButton.disabled = false;
-        updateButton.classList.remove("disabled");
+        updateButton.classList.remove("opacity-40", "cursor-not-allowed");
 
         deleteButton.disabled = false;
-        deleteButton.classList.remove("disabled");
+        deleteButton.classList.remove("opacity-40", "cursor-not-allowed");
 
         // 추가 버튼은 그대로 두고, 필요 시 별도 스타일 조정 가능
         refreshParentOptions();
@@ -1356,9 +1347,6 @@
         } else {
           updateFirebaseStatus(false);
         }
-        
-        // Semantic UI 컴포넌트 초기화
-        initSemanticUI();
       })();
 
       // Firebase 상태 표시 업데이트
@@ -1367,27 +1355,16 @@
         
         if (connected) {
           firebaseStatus.textContent = "🟢 실시간 동기화";
-          firebaseStatus.classList.remove("hidden");
-          firebaseStatus.className = "ui green label";
+          firebaseStatus.classList.remove("hidden", "border-slate-700", "bg-slate-900/60");
+          firebaseStatus.classList.add("border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
           firebaseStatus.title = "Firebase 실시간 동기화 활성화됨";
         } else {
           firebaseStatus.textContent = "⚪ 로컬 저장";
-          firebaseStatus.classList.remove("hidden");
-          firebaseStatus.className = "ui grey label";
+          firebaseStatus.classList.remove("hidden", "border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
+          firebaseStatus.classList.add("border-slate-700", "bg-slate-900/60");
           firebaseStatus.title = "Firebase가 설정되지 않음. localStorage를 사용합니다.";
         }
       }
-
-      // Semantic UI 컴포넌트 초기화
-      function initSemanticUI() {
-        if (typeof $ !== 'undefined') {
-          $('.ui.dropdown').dropdown();
-          $('.ui.sticky').sticky();
-        }
-      }
-
-      // 페이지 로드 시 Semantic UI 초기화
-      initSemanticUI();
     </script>
   </body>
 </html>
