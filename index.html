@@ -19,101 +19,12 @@
       body {
         background-color: #f9fafb;
       }
-      
-      .game-over {
-        animation: shake 0.5s;
-      }
-
-      @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-      }
-      
-      .quiz-error {
-        display: none;
-      }
-      
-      .quiz-error.show {
-        display: block;
-      }
     </style>
   </head>
   <body>
     <div class="ui container" style="min-height: 100vh; padding: 2rem 0;">
-      <!-- 통합 인트로 화면 (퀴즈 + 프로젝트 선택) -->
-      <section
-        id="intro-screen"
-        class="ui center aligned container"
-        style="padding: 4rem 0;"
-      >
-        <div class="ui centered card" style="max-width: 600px; width: 100%;">
-          <div class="content">
-            <!-- 게임 타이틀 -->
-            <div class="ui center aligned header" style="margin-bottom: 2rem;">
-              <h1 class="ui huge header" style="color: #2185d0;">
-                SITEMAP PLANNER
-              </h1>
-              <p class="ui sub header" style="color: #767676;">
-                ACCESS CONTROL SYSTEM v1.0
-              </p>
-            </div>
-
-            <!-- 퀴즈 섹션 -->
-            <div id="quiz-section" class="ui segment">
-              <!-- 질문 박스 -->
-              <div class="ui raised segment">
-                <div class="ui header">
-                  <div class="content">
-                    <i class="question circle icon"></i>
-                    [ 質問 ]
-                  </div>
-                </div>
-                <p class="ui large text" style="margin: 1rem 0; font-weight: bold;">
-                  私が働いている場所は？
-                </p>
-                
-                <!-- 입력 필드 -->
-                <div class="ui form" style="margin-top: 2rem;">
-                  <div class="field">
-                    <label>[ ANSWER ]</label>
-                    <input
-                      type="text"
-                      id="quiz-answer"
-                      placeholder="답을 입력하세요..."
-                      autocomplete="off"
-                    />
-                  </div>
-                  <p id="quiz-error" class="ui red message quiz-error" style="margin-top: 1rem;">
-                    <i class="exclamation circle icon"></i>
-                    잘못된 답변입니다! 다시 시도해주세요!
-                  </p>
-                </div>
-
-                <!-- 버튼 -->
-                <div style="text-align: center; margin-top: 2rem;">
-                  <button
-                    id="quiz-submit"
-                    class="ui primary large button"
-                  >
-                    <i class="play icon"></i>
-                    시작하기
-                  </button>
-                </div>
-              </div>
-
-              <!-- 게임 정보 -->
-              <div class="ui info message">
-                <i class="keyboard icon"></i>
-                Enter 키를 눌러 제출할 수 있습니다.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- 메인 작업 영역 -->
-      <main id="app-shell" class="hidden">
+      <main id="app-shell">
         <!-- 헤더 -->
         <header class="ui sticky top menu" style="margin-bottom: 2rem;">
           <div class="ui container">
@@ -454,11 +365,6 @@
       let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
       let firebaseListener = null; // 실시간 리스너 참조
 
-      const quizSection = document.getElementById("quiz-section");
-      const quizAnswerInput = document.getElementById("quiz-answer");
-      const quizSubmitBtn = document.getElementById("quiz-submit");
-      const quizErrorMsg = document.getElementById("quiz-error");
-      const introScreen = document.getElementById("intro-screen");
       const appShell = document.getElementById("app-shell");
 
       const form = document.getElementById("page-form");
@@ -1452,10 +1358,7 @@
         }
         
         // Semantic UI 컴포넌트 초기화
-        if (typeof $ !== 'undefined') {
-          $('.ui.dropdown').dropdown();
-          $('.ui.sticky').sticky();
-        }
+        initSemanticUI();
       })();
 
       // Firebase 상태 표시 업데이트
@@ -1475,50 +1378,16 @@
         }
       }
 
-      // 인트로 → 메인 전환
-      function showAppShell() {
-        introScreen.classList.add("hidden");
-        appShell.classList.remove("hidden");
-        // Semantic UI 컴포넌트 초기화
+      // Semantic UI 컴포넌트 초기화
+      function initSemanticUI() {
         if (typeof $ !== 'undefined') {
           $('.ui.dropdown').dropdown();
           $('.ui.sticky').sticky();
         }
       }
 
-      // 퀴즈 정답 확인
-      function checkQuizAnswer() {
-        const answer = quizAnswerInput.value.trim();
-        const correctAnswer = "통진";
-        
-        if (answer === correctAnswer) {
-          // 정답: 바로 메인 작업 페이지로 이동
-          quizErrorMsg.classList.remove("show");
-          quizAnswerInput.value = "";
-          showAppShell();
-        } else {
-          // 오답: 에러 메시지 표시 및 shake 효과
-          quizErrorMsg.classList.add("show");
-          quizAnswerInput.classList.add("game-over");
-          quizAnswerInput.value = "";
-          quizAnswerInput.focus();
-          
-          // shake 효과 제거 (다음 입력을 위해)
-          setTimeout(() => {
-            quizAnswerInput.classList.remove("game-over");
-          }, 500);
-        }
-      }
-
-      // 퀴즈 제출 버튼 클릭
-      quizSubmitBtn.addEventListener("click", checkQuizAnswer);
-
-      // 퀴즈 입력 필드에서 Enter 키 입력
-      quizAnswerInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          checkQuizAnswer();
-        }
-      });
+      // 페이지 로드 시 Semantic UI 초기화
+      initSemanticUI();
     </script>
   </body>
 </html>
