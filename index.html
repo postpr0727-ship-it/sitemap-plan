@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sitemap Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 파비콘 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cg fill='none' stroke='%2300ff00' stroke-width='2'%3E%3Cpath d='M16 4 L16 12 M8 12 L16 12 L24 12 M8 12 L8 20 M24 12 L24 20 M8 20 L8 28 M24 20 L24 28'/%3E%3C/g%3E%3Ccircle cx='16' cy='4' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='12' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='20' r='2' fill='%2300ff00'/%3E%3Ccircle cx='8' cy='28' r='2' fill='%2300ff00'/%3E%3Ccircle cx='24' cy='28' r='2' fill='%2300ff00'/%3E%3C/svg%3E" />
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- 픽셀 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+      /* 스크롤바 스타일 */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(100, 116, 139, 0.6), rgba(71, 85, 105, 0.6));
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, rgba(100, 116, 139, 0.8), rgba(71, 85, 105, 0.8));
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      /* 애니메이션 정의 */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -1000px 0;
+        }
+        100% {
+          background-position: 1000px 0;
+        }
+      }
+
+      /* 그라데이션 배경 */
+      body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+      }
+
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* 글래스모피즘 효과 */
+      .glass {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+      }
+
+      /* 버튼 호버 효과 */
+      .btn-hover-glow:hover {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        transform: translateY(-1px);
+      }
+
+      /* 카드 애니메이션 */
+      .card-fade-in {
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      /* 드래그 중인 요소 */
+      .dragging {
+        opacity: 0.5;
+        transform: scale(0.95);
+        transition: all 0.2s ease;
+      }
+
+      /* 네온 그라데이션 텍스트 */
+      .neon-text {
+        background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 3s linear infinite;
+      }
+
+      /* 반짝이는 테두리 효과 */
+      .glow-border {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .glow-border::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #10b981, #3b82f6, #8b5cf6, #10b981);
+        background-size: 400%;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.3s;
+        animation: shimmer 3s linear infinite;
+        z-index: -1;
+      }
+
+      .glow-border:hover::before {
+        opacity: 0.5;
+      }
+
+      /* 부드러운 트랜지션 */
+      * {
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      }
+
+      button, a {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* 테이블 행 호버 */
+      #page-table-body tr {
+        transition: all 0.2s ease;
+      }
+
+      #page-table-body tr:hover {
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));
+        transform: translateX(2px);
+      }
+
+
+      /* 입력 필드 포커스 효과 */
+      input:focus, textarea:focus, select:focus {
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-slate-100">
+    <div class="min-h-screen flex flex-col">
+      <!-- 메인 작업 영역 -->
+      <main id="app-shell" class="flex-1 flex flex-col">
+        <!-- 헤더 -->
+        <header
+          class="border-b border-slate-800/50 glass sticky top-0 z-20 shadow-lg shadow-slate-900/50"
+        >
+          <div
+            class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4"
+          >
+            <div>
+              <h1 class="text-xl font-bold tracking-tight neon-text">
+                사이트맵 기획 보드
+              </h1>
+              <p class="text-xs text-slate-400 mt-1">
+                홈페이지 제작을 위한 메뉴/페이지 구조, 상·하위 관계, 병렬/직렬 구성을 설계하세요.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <span
+                id="firebase-status"
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60 hidden"
+                title="Firebase 연결 상태"
+              ></span>
+              <div class="flex gap-1">
+                <button
+                  id="undo-button"
+                  class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-[11px] transition opacity-40 cursor-not-allowed"
+                  title="실행 취소 (Ctrl+Z)"
+                  disabled
+                >
+                  ↶ 되돌리기
+                </button>
+                <button
+                  id="redo-button"
+                  class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-[11px] transition opacity-40 cursor-not-allowed"
+                  title="다시 실행 (Ctrl+Y)"
+                  disabled
+                >
+                  ↷ 다시실행
+                </button>
+                <button
+                  id="paste-button"
+                  class="px-2 py-1 rounded-lg border border-emerald-600/70 bg-emerald-900/60 hover:bg-emerald-800 text-emerald-100 text-[11px] transition"
+                  title="붙여넣기 (Ctrl+V)"
+                >
+                  📋 붙여넣기
+                </button>
+              </div>
+              <span
+                class="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/60"
+                >Tailwind + JavaScript</span
+              >
+              <button
+                id="export-json"
+                class="px-3 py-1.5 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 text-[11px] transition-all hover:shadow-lg hover:shadow-sky-500/30 hover:scale-105"
+              >
+                💾 JSON 내보내기
+              </button>
+            </div>
+          </div>
+        </header>
+        <div class="max-w-6xl mx-auto px-4 py-4 flex gap-4 flex-1">
+          <!-- 좌측: 입력 사이드바 -->
+          <aside
+            class="w-72 lg:w-80 shrink-0 glass rounded-2xl p-4 flex flex-col gap-4 sticky top-20 self-start shadow-xl shadow-slate-900/50 card-fade-in"
+          >
+            <!-- 입력 폼 -->
+            <div class="flex flex-col gap-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-semibold text-slate-100">
+                  페이지 정보 입력
+                </h2>
+              </div>
+              <!-- 프로젝트 선택 -->
+              <div class="flex flex-col gap-1 text-[11px] text-slate-400">
+                <div class="flex items-center gap-2">
+                  <label for="project-select" class="whitespace-nowrap"
+                    >작업 프로젝트</label
+                  >
+                  <select
+                    id="project-select"
+                    class="flex-1 rounded-lg border border-slate-700 bg-slate-900/70 px-2 py-1 text-[11px] focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                  >
+                    <!-- JS에서 채움 -->
+                  </select>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap gap-1 flex-1">
+                    <span
+                      class="px-2 py-0.5 rounded-full border border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                    >
+                      <span id="current-project-label">기본 프로젝트</span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    id="new-project-button"
+                    class="px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-[11px] text-slate-200"
+                  >
+                    새 프로젝트
+                  </button>
+                  <button
+                    type="button"
+                    id="delete-project-button"
+                    class="px-2 py-1 rounded-lg border border-rose-600/70 bg-rose-900/60 hover:bg-rose-800 text-rose-100 text-[11px] transition"
+                    title="현재 프로젝트 삭제"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <form
+              id="page-form"
+              class="flex flex-col gap-3 text-xs"
+            >
+              <input type="hidden" id="editing-id" />
+
+              <!-- 페이지 제목 -->
+              <div>
+                <label class="block mb-1 text-slate-300">페이지 제목</label>
+                <input
+                  type="text"
+                  id="title"
+                  required
+                  placeholder="예) 회사소개, 서비스 소개, 문의하기"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                />
+              </div>
+
+              <!-- URL 주소 -->
+              <div>
+                <label class="block mb-1 text-slate-300">URL 주소</label>
+                <div class="flex items-center gap-1">
+                  <span
+                    class="px-2 py-1 rounded-lg bg-slate-900/80 border border-slate-700 text-[11px] text-slate-400"
+                    >/</span
+                  >
+                  <input
+                    type="text"
+                    id="url"
+                    placeholder="about, service, contact 등"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                  />
+                </div>
+              </div>
+
+              <!-- 상위 메뉴 -->
+              <div>
+                <label class="block mb-1 text-slate-300">상위 메뉴</label>
+                <select
+                  id="parent-id"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                >
+                  <option value="">(최상위 메뉴)</option>
+                </select>
+                <p class="mt-1 text-[11px] text-slate-500">
+                  상위 메뉴를 선택하면 선택한 메뉴의 하위 페이지로 구성됩니다.
+                </p>
+              </div>
+
+              <!-- 요약/설명 -->
+              <div>
+                <label class="block mb-1 text-slate-300">페이지 내용 요약</label>
+                <textarea
+                  id="description"
+                  rows="3"
+                  placeholder="페이지의 주요 목적, 핵심 콘텐츠, 타겟 사용자 등을 간단히 작성하세요."
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+                ></textarea>
+              </div>
+
+              <!-- 버튼 -->
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    id="add-button"
+                    class="inline-flex items-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-medium px-3 py-1.5 text-xs transition btn-hover-glow"
+                  >
+                    ✨ 페이지 추가
+                  </button>
+                  <button
+                    type="button"
+                    id="update-button"
+                    class="inline-flex items-center gap-1 rounded-lg border border-amber-500/60 bg-amber-500/10 text-amber-200 px-3 py-1.5 text-xs transition opacity-40 cursor-not-allowed"
+                  >
+                    페이지 수정
+                  </button>
+                  <button
+                    type="button"
+                    id="delete-button"
+                    class="inline-flex items-center gap-1 rounded-lg border border-rose-600/70 bg-rose-900/60 hover:bg-rose-800 text-rose-100 px-3 py-1.5 text-xs transition opacity-40 cursor-not-allowed"
+                  >
+                    페이지 삭제
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  id="save-project-button"
+                  class="w-full inline-flex items-center justify-center gap-1 rounded-lg border border-sky-500/70 bg-sky-500/10 hover:bg-sky-500/20 text-sky-200 px-3 py-1.5 text-xs transition-all hover:shadow-lg hover:shadow-sky-500/30 hover:scale-105"
+                >
+                  💾 프로젝트 저장
+                </button>
+              </div>
+            </form>
+          </aside>
+
+          <!-- 우측: 목록 + 구조 미리보기 -->
+          <section class="flex-1 flex flex-col gap-4">
+            <!-- 입력된 페이지 리스트 -->
+            <div class="glass rounded-2xl p-4 shadow-xl shadow-slate-900/50 card-fade-in">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <h3 class="text-xs font-semibold text-slate-200">
+                    페이지 목록
+                  </h3>
+                  <p class="text-[10px] text-slate-500 mt-0.5">
+                    💡 ↑↓ 버튼으로 같은 레벨 내에서 순서 변경 가능
+                  </p>
+                </div>
+                <span
+                  id="page-count"
+                  class="text-[11px] text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded-full border border-slate-700"
+                  >0개 페이지</span
+                >
+              </div>
+              <div
+                class="max-h-64 lg:max-h-72 overflow-auto rounded-xl border border-slate-800/50 bg-gradient-to-b from-slate-950/60 to-slate-950/30 shadow-inner"
+              >
+                <table class="w-full text-[11px]">
+                  <thead class="bg-gradient-to-r from-slate-900/90 to-slate-800/90 text-slate-300 sticky top-0 z-10 backdrop-blur-sm">
+                    <tr>
+                      <th class="px-3 py-2 text-left font-medium w-16">레벨</th>
+                      <th class="px-3 py-2 text-left font-medium">제목</th>
+                      <th class="px-3 py-2 text-left font-medium w-24">URL</th>
+                      <th class="px-3 py-2 text-right font-medium w-32">액션</th>
+                    </tr>
+                  </thead>
+                  <tbody id="page-table-body" class="divide-y divide-slate-800">
+                    <tr>
+                      <td
+                        colspan="4"
+                        class="px-3 py-6 text-center text-slate-500 text-xs"
+                      >
+                        아직 추가된 페이지가 없습니다. 좌측에서 페이지를
+                        추가하세요.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 구조 미리보기 -->
+            <section
+              class="glass rounded-2xl p-4 flex flex-col gap-3 shadow-xl shadow-slate-900/50 card-fade-in"
+            >
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="text-sm font-semibold text-slate-100">
+                사이트맵 구조 미리보기
+              </h2>
+              <div class="flex gap-2 text-[11px] text-slate-400">
+                <button
+                  id="expand-all"
+                  class="px-2 py-0.5 rounded-lg border border-slate-700 hover:bg-slate-800"
+                >
+                  전체 펼치기
+                </button>
+                <button
+                  id="collapse-all"
+                  class="px-2 py-0.5 rounded-lg border border-slate-700 hover:bg-slate-800"
+                >
+                  전체 접기
+                </button>
+              </div>
+            </div>
+
+              <div
+                class="text-[11px] text-slate-400 bg-slate-950/50 border border-dashed border-slate-700 rounded-xl px-3 py-2"
+              >
+                - 박스 간 세로 줄기는 상·하위(계층) 관계를 의미합니다.<br />
+                - 같은 레벨에서 직렬(순차) 그룹은 번호로 이어지며, 병렬 그룹은
+                가로로 나란히 배치됩니다.<br />
+                - 각 박스를 클릭하면 해당 페이지가 편집 모드로 전환됩니다.
+              </div>
+
+              <div
+                id="sitemap-container"
+                class="flex-1 min-h-[260px] max-h-[420px] overflow-auto rounded-xl border border-slate-800/50 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-slate-950/60 px-3 py-3 shadow-inner"
+              >
+                <div
+                  class="h-full flex items-center justify-center text-xs text-slate-500"
+                >
+                  좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.
+                </div>
+              </div>
+
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ============================================
+      // Firebase 설정 (간단 버전)
+      // ============================================
+      // 1. https://console.firebase.google.com 접속 → 프로젝트 만들기
+      // 2. 빌드 > Realtime Database > 데이터베이스 만들기 (테스트 모드)
+      // 3. 톱니바퀴 아이콘 > 프로젝트 설정 > 웹 앱 추가 > 설정 정보 복사
+      // 4. 아래 firebaseConfig에 붙여넣기
+      //
+      // 자세한 가이드: FIREBASE_SETUP.md 파일 참고
+      const firebaseConfig = {
+        apiKey: "AIzaSyBtYMv7SLwLFybFaE81nfJ8kYMySGKd9cs",
+        authDomain: "sitemap-9177c.firebaseapp.com",
+        databaseURL: "https://sitemap-9177c-default-rtdb.firebaseio.com",
+        projectId: "sitemap-9177c",
+        storageBucket: "sitemap-9177c.firebasestorage.app",
+        messagingSenderId: "806332670610",
+        appId: "1:806332670610:web:5c2ab54730b40d53503c4b"
+      };
+
+      // Firebase 초기화
+      let database = null;
+      let isFirebaseConfigured = false;
+      
+      try {
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+          firebase.initializeApp(firebaseConfig);
+          database = firebase.database();
+          isFirebaseConfigured = true;
+          console.log("Firebase가 성공적으로 초기화되었습니다.");
+        } else {
+          console.warn("Firebase 설정이 필요합니다. localStorage를 사용합니다.");
+        }
+      } catch (error) {
+        console.error("Firebase 초기화 오류:", error);
+        console.warn("localStorage를 사용합니다.");
+      }
+
+      // Firebase 데이터베이스 경로
+      const DB_PATH = "sitemapProjects";
+
+      // 프로젝트 & 페이지 데이터 저장용 메모리
+      const projects = [];
+      let currentProjectId = null;
+      let pages = []; // 항상 현재 프로젝트의 pages 배열을 가리키도록 사용
+      let firebaseListener = null; // 실시간 리스너 참조
+
+      // Undo/Redo 히스토리 관리
+      const history = {
+        past: [],
+        future: [],
+        maxSize: 50,
+        isRestoring: false // 복원 중인지 여부 (자동 저장 방지)
+      };
+
+      // 페이지 복사 관리
+      let copiedPage = null;
+
+      const appShell = document.getElementById("app-shell");
+
+      const form = document.getElementById("page-form");
+      const editingIdInput = document.getElementById("editing-id");
+      const addButton = document.getElementById("add-button");
+      const updateButton = document.getElementById("update-button");
+      const deleteButton = document.getElementById("delete-button");
+      const saveProjectButton = document.getElementById("save-project-button");
+      const projectSelect = document.getElementById("project-select");
+      const newProjectButton = document.getElementById("new-project-button");
+      const deleteProjectButton = document.getElementById("delete-project-button");
+      const currentProjectLabel = document.getElementById(
+        "current-project-label"
+      );
+      const parentSelect = document.getElementById("parent-id");
+      const pageTableBody = document.getElementById("page-table-body");
+      const pageCountBadge = document.getElementById("page-count");
+      const sitemapContainer = document.getElementById("sitemap-container");
+      const expandAllBtn = document.getElementById("expand-all");
+      const collapseAllBtn = document.getElementById("collapse-all");
+      const exportJsonBtn = document.getElementById("export-json");
+      const firebaseStatus = document.getElementById("firebase-status");
+
+      // 간단한 ID 생성
+      const createId = () =>
+        "p_" + Math.random().toString(36).substring(2, 9);
+
+      // ============================================
+      // Undo/Redo 기능
+      // ============================================
+      function saveStateToHistory() {
+        if (history.isRestoring) return; // 복원 중에는 히스토리 저장 안 함
+
+        const state = {
+          projects: JSON.parse(JSON.stringify(projects)),
+          currentProjectId: currentProjectId
+        };
+
+        history.past.push(state);
+        if (history.past.length > history.maxSize) {
+          history.past.shift();
+        }
+        history.future = []; // 새 액션이 발생하면 redo 스택 초기화
+        updateUndoRedoButtons();
+      }
+
+      function undo() {
+        if (history.past.length === 0) return;
+
+        history.isRestoring = true;
+
+        // 현재 상태를 future에 저장
+        const currentState = {
+          projects: JSON.parse(JSON.stringify(projects)),
+          currentProjectId: currentProjectId
+        };
+        history.future.push(currentState);
+
+        // 이전 상태 복원
+        const previousState = history.past.pop();
+        restoreState(previousState);
+
+        history.isRestoring = false;
+        updateUndoRedoButtons();
+      }
+
+      function redo() {
+        if (history.future.length === 0) return;
+
+        history.isRestoring = true;
+
+        // 현재 상태를 past에 저장
+        const currentState = {
+          projects: JSON.parse(JSON.stringify(projects)),
+          currentProjectId: currentProjectId
+        };
+        history.past.push(currentState);
+
+        // 다음 상태 복원
+        const nextState = history.future.pop();
+        restoreState(nextState);
+
+        history.isRestoring = false;
+        updateUndoRedoButtons();
+      }
+
+      function restoreState(state) {
+        // 프로젝트 데이터 복원
+        projects.length = 0;
+        state.projects.forEach(p => projects.push(p));
+
+        // 현재 프로젝트 복원
+        if (state.currentProjectId) {
+          currentProjectId = state.currentProjectId;
+          const current = getCurrentProject();
+          if (current) {
+            pages = current.pages;
+          }
+        }
+
+        // UI 갱신
+        refreshProjectSelect();
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+        resetForm();
+
+        // 자동 저장
+        autoSave();
+      }
+
+      function updateUndoRedoButtons() {
+        const undoBtn = document.getElementById('undo-button');
+        const redoBtn = document.getElementById('redo-button');
+
+        if (undoBtn) {
+          undoBtn.disabled = history.past.length === 0;
+          if (history.past.length === 0) {
+            undoBtn.classList.add('opacity-40', 'cursor-not-allowed');
+          } else {
+            undoBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+          }
+        }
+
+        if (redoBtn) {
+          redoBtn.disabled = history.future.length === 0;
+          if (history.future.length === 0) {
+            redoBtn.classList.add('opacity-40', 'cursor-not-allowed');
+          } else {
+            redoBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+          }
+        }
+      }
+
+      // ============================================
+      // 페이지 복사/붙여넣기 기능
+      // ============================================
+      function copyPage(id) {
+        const page = pages.find(p => p.id === id);
+        if (!page) return;
+
+        copiedPage = JSON.parse(JSON.stringify(page));
+
+        // 복사 성공 피드백
+        const copyBtn = document.querySelector(`button[data-copy-id="${id}"]`);
+        if (copyBtn) {
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '✓';
+          copyBtn.classList.add('text-emerald-300');
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove('text-emerald-300');
+          }, 1000);
+        }
+      }
+
+      function pastePage() {
+        if (!copiedPage) {
+          alert("복사된 페이지가 없습니다. 먼저 페이지를 복사하세요.");
+          return;
+        }
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        // 새 페이지 생성 (복사본)
+        const newPage = {
+          ...copiedPage,
+          id: createId(),
+          title: copiedPage.title + " (복사)",
+          order: pages.length,
+          createdAt: new Date().toISOString()
+        };
+
+        pages.push(newPage);
+
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+
+        // 자동 저장
+        autoSave();
+
+        // 성공 메시지
+        alert(`"${copiedPage.title}" 페이지가 복사되었습니다.`);
+      }
+
+      // ============================================
+      // 위/아래 이동 기능
+      // ============================================
+      function movePageUp(pageId) {
+        const page = pages.find(p => p.id === pageId);
+        if (!page) return;
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        // 같은 부모를 가진 형제 페이지들 찾기
+        const siblings = pages.filter(p => (p.parentId || null) === (page.parentId || null));
+
+        // order 필드 초기화
+        siblings.forEach((p, idx) => {
+          if (typeof p.order !== 'number') {
+            p.order = idx;
+          }
+        });
+
+        // order 기준으로 정렬
+        siblings.sort((a, b) => a.order - b.order);
+
+        // 현재 페이지의 인덱스 찾기
+        const currentIndex = siblings.findIndex(p => p.id === pageId);
+
+        if (currentIndex <= 0) {
+          // 이미 맨 위
+          return;
+        }
+
+        // 위 페이지와 order 교환
+        const temp = siblings[currentIndex].order;
+        siblings[currentIndex].order = siblings[currentIndex - 1].order;
+        siblings[currentIndex - 1].order = temp;
+
+        // order 재정렬
+        siblings.sort((a, b) => a.order - b.order);
+        siblings.forEach((p, idx) => {
+          p.order = idx;
+        });
+
+        // 렌더링 및 저장
+        renderTable();
+        renderSitemap();
+        autoSave();
+      }
+
+      function movePageDown(pageId) {
+        const page = pages.find(p => p.id === pageId);
+        if (!page) return;
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        // 같은 부모를 가진 형제 페이지들 찾기
+        const siblings = pages.filter(p => (p.parentId || null) === (page.parentId || null));
+
+        // order 필드 초기화
+        siblings.forEach((p, idx) => {
+          if (typeof p.order !== 'number') {
+            p.order = idx;
+          }
+        });
+
+        // order 기준으로 정렬
+        siblings.sort((a, b) => a.order - b.order);
+
+        // 현재 페이지의 인덱스 찾기
+        const currentIndex = siblings.findIndex(p => p.id === pageId);
+
+        if (currentIndex < 0 || currentIndex >= siblings.length - 1) {
+          // 이미 맨 아래
+          return;
+        }
+
+        // 아래 페이지와 order 교환
+        const temp = siblings[currentIndex].order;
+        siblings[currentIndex].order = siblings[currentIndex + 1].order;
+        siblings[currentIndex + 1].order = temp;
+
+        // order 재정렬
+        siblings.sort((a, b) => a.order - b.order);
+        siblings.forEach((p, idx) => {
+          p.order = idx;
+        });
+
+        // 렌더링 및 저장
+        renderTable();
+        renderSitemap();
+        autoSave();
+      }
+
+      // 현재 프로젝트 가져오기
+      function getCurrentProject() {
+        return projects.find((p) => p.id === currentProjectId) || null;
+      }
+
+      // 프로젝트 선택 UI 갱신
+      function refreshProjectSelect() {
+        projectSelect.innerHTML = "";
+        projects.forEach((p) => {
+          const option = document.createElement("option");
+          option.value = p.id;
+          const count = (p.pages || []).length;
+          option.textContent = `${p.name}${
+            count ? ` (${count} 페이지)` : ""
+          }`;
+          projectSelect.appendChild(option);
+        });
+        if (currentProjectId) {
+          projectSelect.value = currentProjectId;
+        }
+        const current = getCurrentProject();
+        if (current) {
+          currentProjectLabel.textContent = current.name;
+        }
+      }
+
+      // 프로젝트 생성
+      function createProject(name) {
+        const id = "proj_" + Math.random().toString(36).substring(2, 9);
+        const project = { id, name, pages: [] };
+        projects.push(project);
+        return project;
+      }
+
+      // 프로젝트 전환
+      function setCurrentProject(id) {
+        const project = projects.find((p) => p.id === id);
+        if (!project) return;
+        currentProjectId = id;
+        pages = project.pages;
+
+        // order 필드 초기화 (없는 페이지들에게 추가)
+        initializePageOrder();
+
+        resetForm();
+        refreshProjectSelect();
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+
+        // 프로젝트 전환 시 자동 저장 (Firebase 사용 시)
+        if (isFirebaseConfigured) {
+          autoSave();
+        }
+      }
+
+      // 페이지 order 필드 초기화
+      function initializePageOrder() {
+        // 부모별로 그룹화
+        const pagesByParent = {};
+        pages.forEach(p => {
+          const parentKey = p.parentId || 'root';
+          if (!pagesByParent[parentKey]) {
+            pagesByParent[parentKey] = [];
+          }
+          pagesByParent[parentKey].push(p);
+        });
+
+        // 각 그룹별로 order 부여
+        Object.values(pagesByParent).forEach(group => {
+          group.forEach((p, idx) => {
+            if (typeof p.order !== 'number') {
+              p.order = idx;
+            }
+          });
+        });
+      }
+
+      // 프로젝트 삭제
+      function deleteProject() {
+        const current = getCurrentProject();
+        if (!current) {
+          alert("삭제할 프로젝트가 없습니다.");
+          return;
+        }
+
+        // 최소 1개 프로젝트는 유지
+        if (projects.length <= 1) {
+          alert("최소 1개의 프로젝트는 유지해야 합니다.");
+          return;
+        }
+
+        const projectName = current.name;
+        const pageCount = (current.pages || []).length;
+        
+        if (!confirm(`"${projectName}" 프로젝트를 삭제하시겠습니까?\n(페이지 ${pageCount}개가 함께 삭제됩니다.)`)) {
+          return;
+        }
+
+        // 프로젝트 삭제
+        const index = projects.findIndex((p) => p.id === currentProjectId);
+        if (index >= 0) {
+          projects.splice(index, 1);
+        }
+
+        // 다른 프로젝트로 전환 (첫 번째 프로젝트)
+        if (projects.length > 0) {
+          setCurrentProject(projects[0].id);
+        } else {
+          // 프로젝트가 없으면 기본 프로젝트 생성
+          const defaultProject = createProject("기본 프로젝트");
+          setCurrentProject(defaultProject.id);
+        }
+
+        // Firebase 또는 localStorage에서도 삭제된 프로젝트 제거
+        saveProject();
+      }
+
+      // 프로젝트 저장 (Firebase 또는 localStorage)
+      async function saveProject() {
+        const current = getCurrentProject();
+        if (!current) {
+          alert("저장할 프로젝트가 없습니다.");
+          return;
+        }
+
+        try {
+          // 모든 프로젝트 저장
+          const savedData = {
+            projects: projects,
+            currentProjectId: currentProjectId,
+            savedAt: new Date().toISOString()
+          };
+
+          if (isFirebaseConfigured && database) {
+            // Firebase에 저장
+            await database.ref(DB_PATH).set(savedData);
+            console.log("Firebase에 저장 완료");
+          } else {
+            // localStorage에 저장 (백업)
+            localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
+          }
+          
+          // 프로젝트 선택 목록 업데이트
+          refreshProjectSelect();
+          
+          // 성공 메시지
+          const originalText = saveProjectButton.textContent;
+          saveProjectButton.textContent = isFirebaseConfigured ? "저장 완료! (실시간 동기화)" : "저장 완료!";
+          saveProjectButton.classList.add("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+          saveProjectButton.classList.remove("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
+          
+          setTimeout(() => {
+            saveProjectButton.textContent = originalText;
+            saveProjectButton.classList.remove("bg-emerald-500/20", "border-emerald-500/70", "text-emerald-200");
+            saveProjectButton.classList.add("bg-sky-500/10", "border-sky-500/70", "text-sky-200");
+          }, 2000);
+        } catch (error) {
+          console.error("저장 오류:", error);
+          const errorMessage = error.message || "알 수 없는 오류";
+          let userMessage = "프로젝트 저장 중 오류가 발생했습니다: " + errorMessage;
+          
+          // 권한 오류인 경우 안내 메시지 추가
+          if (errorMessage.includes("PERMISSION_DENIED") || errorMessage.includes("Permission denied")) {
+            userMessage += "\n\n해결 방법:\n1. Firebase Console → Realtime Database → 규칙\n2. FIREBASE_SECURITY_RULES.md 파일 참고";
+          }
+          
+          alert(userMessage);
+        }
+      }
+
+      // 자동 저장 (페이지 추가/수정/삭제 시)
+      async function autoSave() {
+        if (isFirebaseConfigured && database) {
+          try {
+            const savedData = {
+              projects: projects,
+              currentProjectId: currentProjectId,
+              savedAt: new Date().toISOString()
+            };
+            await database.ref(DB_PATH).set(savedData);
+            console.log("자동 저장 완료");
+          } catch (error) {
+            console.error("자동 저장 오류:", error);
+            // 자동 저장 실패는 조용히 처리 (사용자에게 알리지 않음)
+            // 수동 저장 버튼을 통해 저장할 수 있음
+          }
+        } else {
+          // Firebase가 없으면 localStorage에 저장
+          try {
+            const savedData = {
+              projects: projects,
+              currentProjectId: currentProjectId,
+              savedAt: new Date().toISOString()
+            };
+            localStorage.setItem("sitemapProjects", JSON.stringify(savedData));
+            console.log("localStorage에 자동 저장 완료");
+          } catch (error) {
+            console.error("localStorage 자동 저장 오류:", error);
+          }
+        }
+      }
+
+      // 프로젝트 불러오기 (Firebase 우선, 없으면 localStorage)
+      async function loadProjects() {
+        try {
+          let data = null;
+
+          if (isFirebaseConfigured && database) {
+            // Firebase에서 불러오기 (우선)
+            try {
+              const snapshot = await database.ref(DB_PATH).once('value');
+              if (snapshot.exists()) {
+                data = snapshot.val();
+                console.log("Firebase에서 프로젝트 불러오기 완료");
+              } else {
+                console.log("Firebase에 저장된 데이터가 없습니다.");
+                // Firebase에 데이터가 없으면 localStorage 확인
+                const savedData = localStorage.getItem("sitemapProjects");
+                if (savedData) {
+                  data = JSON.parse(savedData);
+                  console.log("localStorage에서 프로젝트 불러오기 완료");
+                  // localStorage 데이터를 Firebase에 동기화
+                  await autoSave();
+                }
+              }
+            } catch (firebaseError) {
+              console.error("Firebase 불러오기 오류:", firebaseError);
+              // Firebase 오류 시 localStorage 사용
+              const savedData = localStorage.getItem("sitemapProjects");
+              if (savedData) {
+                data = JSON.parse(savedData);
+                console.log("Firebase 오류로 localStorage에서 불러오기");
+              }
+            }
+          } else {
+            // Firebase가 설정되지 않았으면 localStorage에서 불러오기
+            const savedData = localStorage.getItem("sitemapProjects");
+            if (savedData) {
+              data = JSON.parse(savedData);
+            }
+          }
+
+          if (!data) return false;
+
+          if (data.projects && Array.isArray(data.projects)) {
+            // 기존 프로젝트 배열에 저장된 프로젝트 추가
+            data.projects.forEach(savedProject => {
+              // 중복 ID 체크
+              const exists = projects.find(p => p.id === savedProject.id);
+              if (!exists) {
+                projects.push(savedProject);
+              } else {
+                // 기존 프로젝트 업데이트 (페이지 데이터만)
+                const existing = projects.find(p => p.id === savedProject.id);
+                if (existing) {
+                  existing.pages = savedProject.pages || [];
+                  existing.name = savedProject.name || existing.name;
+                }
+              }
+            });
+
+            // 현재 프로젝트 복원
+            if (data.currentProjectId) {
+              const restored = projects.find(p => p.id === data.currentProjectId);
+              if (restored) {
+                setCurrentProject(data.currentProjectId);
+                return true;
+              }
+            }
+          }
+          return false;
+        } catch (error) {
+          console.error("프로젝트 불러오기 오류:", error);
+          return false;
+        }
+      }
+
+      // Firebase 실시간 동기화 리스너 설정
+      function setupRealtimeSync() {
+        if (!isFirebaseConfigured || !database) {
+          return;
+        }
+
+        // 기존 리스너 제거
+        if (firebaseListener) {
+          database.ref(DB_PATH).off('value', firebaseListener);
+        }
+
+        // 실시간 리스너 추가
+        firebaseListener = database.ref(DB_PATH).on('value', (snapshot) => {
+          if (!snapshot.exists()) return;
+
+          const data = snapshot.val();
+          if (!data || !data.projects) return;
+
+          // 현재 편집 중인 페이지가 있으면 업데이트하지 않음 (충돌 방지)
+          const isEditing = editingIdInput.value !== "";
+
+          // 프로젝트 데이터 동기화
+          const remoteProjects = data.projects || [];
+          let hasChanges = false;
+
+          remoteProjects.forEach(remoteProject => {
+            const localProject = projects.find(p => p.id === remoteProject.id);
+            
+            if (!localProject) {
+              // 새 프로젝트 추가
+              projects.push(remoteProject);
+              hasChanges = true;
+            } else {
+              // 프로젝트 업데이트 (편집 중이 아닐 때만)
+              if (!isEditing && JSON.stringify(localProject.pages) !== JSON.stringify(remoteProject.pages)) {
+                localProject.pages = remoteProject.pages || [];
+                localProject.name = remoteProject.name || localProject.name;
+                hasChanges = true;
+              }
+            }
+          });
+
+          // 프로젝트 목록이 변경되었으면 UI 업데이트
+          if (hasChanges && !isEditing) {
+            // 프로젝트 선택 목록 갱신
+            refreshProjectSelect();
+            
+            const current = getCurrentProject();
+            if (current) {
+              pages = current.pages;
+              refreshParentOptions();
+              renderTable();
+              renderSitemap();
+            }
+          }
+
+          // 현재 프로젝트 ID 동기화 (다른 브라우저에서 프로젝트 전환 시)
+          if (data.currentProjectId && data.currentProjectId !== currentProjectId && !isEditing) {
+            const targetProject = projects.find(p => p.id === data.currentProjectId);
+            if (targetProject) {
+              // setCurrentProject를 호출하지 않고 직접 전환 (무한 루프 방지)
+              currentProjectId = data.currentProjectId;
+              pages = targetProject.pages;
+              refreshProjectSelect();
+              refreshParentOptions();
+              renderTable();
+              renderSitemap();
+              resetForm();
+            }
+          }
+        }, (error) => {
+          console.error("Firebase 실시간 동기화 오류:", error);
+        });
+
+        console.log("Firebase 실시간 동기화가 활성화되었습니다.");
+      }
+
+      // 폼에서 값 가져오기
+      function getFormData() {
+        const title = document.getElementById("title").value.trim();
+        const url = document.getElementById("url").value.trim();
+        const parentId = parentSelect.value || null;
+        const description =
+          document.getElementById("description").value.trim();
+
+        return {
+          title,
+          url,
+          parentId,
+          description,
+        };
+      }
+
+      // 폼 채우기 (편집용)
+      function fillForm(page) {
+        document.getElementById("title").value = page.title;
+        document.getElementById("url").value = page.url;
+        parentSelect.value = page.parentId || "";
+        document.getElementById("description").value = page.description || "";
+      }
+
+      // 폼 초기화
+      function resetForm() {
+        form.reset();
+        editingIdInput.value = "";
+        // 추가 버튼 기본 상태, 수정 버튼 비활성화
+        addButton.disabled = false;
+        addButton.classList.remove("opacity-40", "cursor-not-allowed");
+        addButton.classList.add("bg-emerald-500", "hover:bg-emerald-400");
+
+        updateButton.disabled = true;
+        updateButton.classList.add("opacity-40", "cursor-not-allowed");
+
+        deleteButton.disabled = true;
+        deleteButton.classList.add("opacity-40", "cursor-not-allowed");
+      }
+
+      // 상위 메뉴 옵션 갱신
+      function refreshParentOptions() {
+        const currentEditingId = editingIdInput.value || null;
+        const previous = parentSelect.value;
+        parentSelect.innerHTML = '<option value="">(최상위 메뉴)</option>';
+
+        pages.forEach((p) => {
+          // 자기 자신은 상위 메뉴로 선택 불가
+          if (p.id === currentEditingId) return;
+          const depth = getDepth(p.id);
+          const indent = "─".repeat(depth);
+          const option = document.createElement("option");
+          option.value = p.id;
+          option.textContent =
+            (indent ? indent + " " : "") +
+            (p.title || "(제목 없음)") +
+            (p.code ? ` [${p.code}]` : "");
+          parentSelect.appendChild(option);
+        });
+
+        // 편집 중이던 값 유지 시도
+        if (previous && previous !== currentEditingId) {
+          parentSelect.value = previous;
+        }
+      }
+
+      // 깊이 계산 (루트 = 0)
+      function getDepth(id) {
+        let depth = 0;
+        let current = pages.find((p) => p.id === id);
+        while (current && current.parentId) {
+          depth++;
+          current = pages.find((p) => p.id === current.parentId);
+        }
+        return depth;
+      }
+
+      // 트리 구조용 노드 구성
+      function buildTree() {
+        const map = {};
+        const roots = [];
+
+        pages.forEach((p) => {
+          map[p.id] = { ...p, children: [] };
+        });
+
+        Object.values(map).forEach((node) => {
+          if (node.parentId && map[node.parentId]) {
+            map[node.parentId].children.push(node);
+          } else {
+            roots.push(node);
+          }
+        });
+
+        // 같은 부모 아래에서 order 필드 기준 정렬 (없으면 order 초기화 후 정렬)
+        function sortChildren(nodes) {
+          // order 필드가 없는 노드들에게 인덱스 부여
+          nodes.forEach((node, idx) => {
+            if (typeof node.order !== 'number') {
+              node.order = idx;
+            }
+          });
+
+          // order 기준으로 정렬
+          nodes.sort((a, b) => a.order - b.order);
+
+          // 자식들도 재귀적으로 정렬
+          nodes.forEach((n) => sortChildren(n.children));
+        }
+
+        sortChildren(roots);
+
+        // 각 루트의 1레벨 자식부터 브랜치 색상 인덱스를 부여
+        const assignBranchColor = (node, branchIndex) => {
+          node.branchColorIndex = branchIndex;
+          node.children.forEach((child) =>
+            assignBranchColor(child, branchIndex)
+          );
+        };
+
+        roots.forEach((root) => {
+          root.children.forEach((child, idx) => {
+            const branchIndex = idx; // 색상 배열 길이에 따라 나중에 모듈로 처리
+            assignBranchColor(child, branchIndex);
+          });
+        });
+
+        return roots;
+      }
+
+      // 테이블 렌더링
+      function renderTable() {
+        pageTableBody.innerHTML = "";
+        if (!pages.length) {
+          pageTableBody.innerHTML =
+            '<tr><td colspan="4" class="px-3 py-6 text-center text-slate-500 text-xs">아직 추가된 페이지가 없습니다. 상단 폼을 이용해 페이지를 추가하세요.</td></tr>';
+          pageCountBadge.textContent = "0개 페이지";
+          return;
+        }
+
+        const tree = buildTree();
+        const rows = [];
+
+        function walk(node, level) {
+          rows.push({ node, level });
+          node.children.forEach((child) => walk(child, level + 1));
+        }
+        tree.forEach((root) => walk(root, 0));
+
+        rows.forEach(({ node, level }) => {
+          const tr = document.createElement("tr");
+          tr.className =
+            "hover:bg-slate-900/70 transition border-b border-slate-900/40 last:border-b-0";
+          tr.dataset.pageId = node.id;
+
+          const depthBadge =
+            level === 0
+              ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-[10px]">0</span>'
+              : `<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-800 text-slate-200 border border-slate-600 text-[10px]">${level}</span>`;
+
+          const urlDisplay = node.url
+            ? "/" + node.url.replace(/^\/+/, "")
+            : "-";
+
+          // 테이블 셀 생성
+          const levelCell = document.createElement('td');
+          levelCell.className = 'px-3 py-1.5 align-top';
+          levelCell.innerHTML = depthBadge;
+
+          const titleCell = document.createElement('td');
+          titleCell.className = 'px-3 py-1.5 align-top';
+          titleCell.innerHTML = `
+            <div class="flex flex-col">
+              <span class="text-[11px] text-slate-100 font-medium">${node.title || "(제목 없음)"}</span>
+              <span class="text-[10px] text-slate-500">
+                ${(node.parentId
+                  ? "하위 · " +
+                    (pages.find((p) => p.id === node.parentId)?.title ||
+                      "상위 메뉴")
+                  : "최상위 메뉴")}
+              </span>
+            </div>
+          `;
+
+          const urlCell = document.createElement('td');
+          urlCell.className = 'px-3 py-1.5 align-top';
+          urlCell.innerHTML = `<span class="font-mono text-[10px] text-slate-200">${urlDisplay}</span>`;
+
+          const actionCell = document.createElement('td');
+          actionCell.className = 'px-3 py-1.5 align-top text-right';
+
+          // 위로 이동 버튼
+          const upBtn = document.createElement('button');
+          upBtn.className = 'text-[12px] text-violet-400 hover:text-violet-300 mr-1 font-bold';
+          upBtn.innerHTML = '↑';
+          upBtn.title = '위로 이동';
+          upBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            movePageUp(node.id);
+          });
+
+          // 아래로 이동 버튼
+          const downBtn = document.createElement('button');
+          downBtn.className = 'text-[12px] text-violet-400 hover:text-violet-300 mr-2 font-bold';
+          downBtn.innerHTML = '↓';
+          downBtn.title = '아래로 이동';
+          downBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            movePageDown(node.id);
+          });
+
+          // 복사 버튼
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'copy-page text-[10px] text-emerald-300 hover:text-emerald-200 mr-1';
+          copyBtn.textContent = '복사';
+          copyBtn.dataset.copyId = node.id;
+          copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyPage(node.id);
+          });
+
+          // 편집 버튼
+          const editBtn = document.createElement('button');
+          editBtn.className = 'edit-page text-[10px] text-sky-300 hover:text-sky-200 mr-1';
+          editBtn.textContent = '편집';
+          editBtn.dataset.id = node.id;
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            enterEditMode(node.id);
+          });
+
+          // 삭제 버튼
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-page text-[10px] text-rose-300 hover:text-rose-200';
+          deleteBtn.textContent = '삭제';
+          deleteBtn.dataset.id = node.id;
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deletePage(node.id);
+          });
+
+          actionCell.appendChild(upBtn);
+          actionCell.appendChild(downBtn);
+          actionCell.appendChild(copyBtn);
+          actionCell.appendChild(editBtn);
+          actionCell.appendChild(deleteBtn);
+
+          tr.appendChild(levelCell);
+          tr.appendChild(titleCell);
+          tr.appendChild(urlCell);
+          tr.appendChild(actionCell);
+
+          pageTableBody.appendChild(tr);
+        });
+
+        pageCountBadge.textContent = `${pages.length}개 페이지`;
+      }
+
+      // 사이트맵 트리 렌더링 (부모/자식 시각 구분 포함)
+      function renderSitemap() {
+        sitemapContainer.innerHTML = "";
+        if (!pages.length) {
+          sitemapContainer.innerHTML =
+            '<div class="h-full flex items-center justify-center text-xs text-slate-500">좌측에서 페이지를 추가하면 사이트맵 구조가 자동으로 그려집니다.</div>';
+          return;
+        }
+
+        const tree = buildTree();
+
+        const rootContainer = document.createElement("div");
+        rootContainer.className =
+          "flex flex-row flex-wrap gap-4 text-[11px] text-slate-100 items-flex-start";
+
+        // 브랜치별 색상 정의: 1레벨 부모마다 다른 계열, 자식은 채도만 낮춤
+        const branchStyles = [
+          {
+            strong: "border-emerald-400 bg-emerald-500/18",
+            soft: "border-emerald-300/80 bg-emerald-500/6",
+            badgeParent: "bg-emerald-500 text-emerald-950 border-emerald-300",
+            badgeChild:
+              "bg-emerald-950/80 text-emerald-200 border-emerald-400/80",
+          },
+          {
+            strong: "border-sky-400 bg-sky-500/18",
+            soft: "border-sky-300/80 bg-sky-500/6",
+            badgeParent: "bg-sky-500 text-sky-950 border-sky-300",
+            badgeChild: "bg-sky-950/80 text-sky-200 border-sky-400/80",
+          },
+          {
+            strong: "border-violet-400 bg-violet-500/18",
+            soft: "border-violet-300/80 bg-violet-500/6",
+            badgeParent: "bg-violet-500 text-violet-950 border-violet-300",
+            badgeChild:
+              "bg-violet-950/80 text-violet-200 border-violet-400/80",
+          },
+          {
+            strong: "border-amber-400 bg-amber-500/18",
+            soft: "border-amber-300/80 bg-amber-500/6",
+            badgeParent: "bg-amber-500 text-amber-950 border-amber-300",
+            badgeChild: "bg-amber-950/80 text-amber-200 border-amber-400/80",
+          },
+          {
+            strong: "border-rose-400 bg-rose-500/18",
+            soft: "border-rose-300/80 bg-rose-500/6",
+            badgeParent: "bg-rose-500 text-rose-950 border-rose-300",
+            badgeChild: "bg-rose-950/80 text-rose-200 border-rose-400/80",
+          },
+          {
+            strong: "border-teal-400 bg-teal-500/18",
+            soft: "border-teal-300/80 bg-teal-500/6",
+            badgeParent: "bg-teal-500 text-teal-950 border-teal-300",
+            badgeChild: "bg-teal-950/80 text-teal-200 border-teal-400/80",
+          },
+        ];
+
+        function createNodeBox(node, level) {
+          const box = document.createElement("button");
+          box.type = "button";
+          box.dataset.id = node.id;
+
+          // 레벨에 따라 색상을 구분
+          // - level 0(최상위): 자식 관계와 무관한 별도 색상(슬레이트 계열)
+          // - level 1부터: 브랜치별 색상 계열 + 채도 차이로 부모-자식 구분
+          let styleClass;
+          if (level === 0) {
+            // 루트: 슬레이트/인디고 계열, 구조 전체의 시작점 느낌
+            styleClass = "border-slate-500 bg-slate-900/80 shadow-md";
+          } else {
+            const branchIndex =
+              typeof node.branchColorIndex === "number"
+                ? node.branchColorIndex % branchStyles.length
+                : 0;
+            const palette = branchStyles[branchIndex];
+            // 1레벨(브랜치 루트)은 강한 색, 그 아래 레벨은 옅은 색
+            styleClass = level === 1 ? palette.strong : palette.soft;
+          }
+
+          box.className =
+            "group relative text-left rounded-xl px-3 py-2 shadow-lg hover:shadow-2xl hover:border-emerald-400/80 hover:bg-slate-900/90 transition-all duration-300 flex flex-col gap-0.5 min-w-[170px] border hover:scale-105 hover:-translate-y-1 glow-border " +
+            styleClass;
+
+          // 레벨에 따른 뱃지/라벨 구분
+          let depthBadge;
+          let roleLabel;
+
+          if (level === 0) {
+            depthBadge =
+              '<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-950 text-[9px] font-semibold">R</span>';
+            roleLabel =
+              '<span class="px-1.5 py-0.5 rounded-full bg-slate-800/90 text-slate-200 border border-slate-500/70 text-[9px] tracking-wide">ROOT</span>';
+          } else {
+            const branchIndex =
+              typeof node.branchColorIndex === "number"
+                ? node.branchColorIndex % branchStyles.length
+                : 0;
+            const palette = branchStyles[branchIndex];
+
+            depthBadge = `<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-950 text-slate-100 border ${level === 1 ? palette.badgeParent.split(" ").find(c=>c.startsWith("border-")) : palette.badgeChild.split(" ").find(c=>c.startsWith("border-"))} text-[9px]">${level}</span>`;
+
+            if (level === 1) {
+              roleLabel = `<span class="px-1.5 py-0.5 rounded-full text-[9px] tracking-wide ${palette.badgeParent}">PARENT</span>`;
+            } else {
+              roleLabel = `<span class="px-1.5 py-0.5 rounded-full text-[9px] tracking-wide ${palette.badgeChild}">CHILD</span>`;
+            }
+          }
+
+          const urlDisplay = node.url
+            ? "/" + node.url.replace(/^\/+/, "")
+            : "-";
+
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <div class="flex items-center gap-1">
+                ${depthBadge}
+                <span class="text-[11px] font-semibold truncate max-w-[140px]">${node.title || "(제목 없음)"}</span>
+              </div>
+              <span class="opacity-0 group-hover:opacity-100 text-[9px] text-emerald-300">편집</span>
+            </div>
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              ${roleLabel}
+              <span class="text-[9px] text-slate-400 font-mono truncate max-w-[90px] text-right">${urlDisplay}</span>
+            </div>
+            ${
+              node.description
+                ? `<div class="text-[10px] text-slate-400 line-clamp-2">${node.description}</div>`
+                : ""
+            }
+          `;
+
+          box.addEventListener("click", () => {
+            enterEditMode(node.id);
+          });
+
+          return box;
+        }
+
+        function renderLevel(nodes, level) {
+          const levelCol = document.createElement("div");
+          levelCol.className =
+            "flex flex-col gap-3" +
+            (level > 0 ? " relative pl-6 border-l border-slate-800/80" : "");
+
+          nodes.forEach((node) => {
+            const nodeWrapper = document.createElement("div");
+            nodeWrapper.className =
+              "flex flex-col gap-2" +
+              (level > 0
+                ? " before:absolute before:-left-[5px] before:top-4 before:w-3 before:border-t before:border-slate-800/80"
+                : "");
+
+            const boxRow = document.createElement("div");
+            boxRow.className = "flex flex-wrap gap-2";
+
+            const box = createNodeBox(node, level);
+            boxRow.appendChild(box);
+            nodeWrapper.appendChild(boxRow);
+
+            if (node.children && node.children.length) {
+              const childContainer = renderLevel(node.children, level + 1);
+              nodeWrapper.appendChild(childContainer);
+            }
+
+            levelCol.appendChild(nodeWrapper);
+          });
+
+          return levelCol;
+        }
+
+        // 최상위 메뉴(루트)를 좌우로 나란히 배치
+        tree.forEach((root) => {
+          const rootColumn = document.createElement("div");
+          rootColumn.className =
+            "flex flex-col gap-3 min-w-[220px] max-w-[260px]";
+
+          const rootBlock = renderLevel([root], 0);
+          rootColumn.appendChild(rootBlock);
+          rootContainer.appendChild(rootColumn);
+        });
+
+        sitemapContainer.appendChild(rootContainer);
+      }
+
+      // JSON 내보내기 (계층 구조 기준)
+      function exportJson() {
+        if (!pages.length) {
+          alert("내보낼 사이트맵 데이터가 없습니다.");
+          return;
+        }
+
+        const tree = buildTree();
+
+        function cleanNode(node) {
+          const { id, title, url, parentId, description, createdAt } = node;
+          const base = { id, title, url, parentId, description, createdAt };
+          if (node.children && node.children.length) {
+            return {
+              ...base,
+              children: node.children.map(cleanNode),
+            };
+          }
+          return base;
+        }
+
+        const exportData = tree.map(cleanNode);
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+          type: "application/json;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "sitemap-structure.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // 편집 모드 진입
+      function enterEditMode(id) {
+        const page = pages.find((p) => p.id === id);
+        if (!page) return;
+        editingIdInput.value = page.id;
+        fillForm(page);
+
+        // 수정 / 삭제 버튼 활성화
+        updateButton.disabled = false;
+        updateButton.classList.remove("opacity-40", "cursor-not-allowed");
+
+        deleteButton.disabled = false;
+        deleteButton.classList.remove("opacity-40", "cursor-not-allowed");
+
+        // 추가 버튼은 그대로 두고, 필요 시 별도 스타일 조정 가능
+        refreshParentOptions();
+      }
+
+      // 페이지 삭제
+      function deletePage(id) {
+        const hasChildren = pages.some((p) => p.parentId === id);
+        if (
+          hasChildren &&
+          !confirm(
+            "이 페이지의 하위 페이지도 함께 삭제됩니다. 계속하시겠습니까?"
+          )
+        ) {
+          return;
+        }
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        // 하위 포함 재귀 삭제
+        function deleteRec(targetId) {
+          const idx = pages.findIndex((p) => p.id === targetId);
+          if (idx >= 0) {
+            pages.splice(idx, 1);
+          }
+          const children = pages.filter((p) => p.parentId === targetId);
+          children.forEach((c) => deleteRec(c.id));
+        }
+        deleteRec(id);
+
+        if (editingIdInput.value === id) {
+          resetForm();
+        }
+
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+
+        // 자동 저장
+        autoSave();
+      }
+
+      // 전체 펼치기 / 접기 (간단 구현: 접기는 최상위만, 펼치기는 모두 표시)
+      function collapseAll() {
+        if (!pages.length) return;
+        const tree = buildTree();
+        const reducedTree = tree.map((n) => ({ ...n, children: [] }));
+
+        sitemapContainer.innerHTML = "";
+        const rootContainer = document.createElement("div");
+        rootContainer.className =
+          "flex flex-col gap-3 text-[11px] text-slate-100";
+
+        const levelView = document.createElement("div");
+        levelView.className = "flex flex-wrap gap-2";
+        reducedTree.forEach((node) => {
+          const box = document.createElement("button");
+          box.type = "button";
+          box.dataset.id = node.id;
+          box.className =
+            "relative text-left rounded-lg border bg-slate-900/90 px-3 py-2 shadow-sm hover:border-emerald-500/80 hover:bg-slate-900 transition flex flex-col gap-0.5 min-w-[150px]";
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="text-[11px] font-medium truncate max-w-[140px]">${node.title}</span>
+              <span class="text-[9px] text-slate-400 font-mono truncate max-w-[80px]">${node.url ? "/" + node.url : "-"}</span>
+            </div>
+          `;
+          box.addEventListener("click", () => enterEditMode(node.id));
+          levelView.appendChild(box);
+        });
+
+        rootContainer.appendChild(levelView);
+        sitemapContainer.appendChild(rootContainer);
+      }
+
+      function expandAll() {
+        renderSitemap();
+      }
+
+      // 이벤트 바인딩
+      // 페이지 추가
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const data = getFormData();
+        if (!data.title) {
+          alert("페이지 제목을 입력해주세요.");
+          return;
+        }
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        // 새로 추가
+        const newPage = {
+          id: createId(),
+          ...data,
+          order: pages.length, // 순서 필드 추가
+          createdAt: new Date().toISOString(),
+        };
+        pages.push(newPage);
+
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+        resetForm();
+
+        // 자동 저장
+        autoSave();
+      });
+
+      // 페이지 수정
+      updateButton.addEventListener("click", () => {
+        const editingId = editingIdInput.value;
+        if (!editingId) {
+          alert("수정할 페이지를 먼저 선택해주세요.");
+          return;
+        }
+        const data = getFormData();
+        if (!data.title) {
+          alert("페이지 제목을 입력해주세요.");
+          return;
+        }
+
+        // 히스토리에 현재 상태 저장
+        saveStateToHistory();
+
+        const idx = pages.findIndex((p) => p.id === editingId);
+        if (idx >= 0) {
+          pages[idx] = { ...pages[idx], ...data };
+        }
+        refreshParentOptions();
+        renderTable();
+        renderSitemap();
+        resetForm();
+
+        // 자동 저장
+        autoSave();
+      });
+
+      // 페이지 삭제 (선택된 페이지 기준, 기존 삭제 로직 재사용)
+      deleteButton.addEventListener("click", () => {
+        const editingId = editingIdInput.value;
+        if (!editingId) {
+          alert("삭제할 페이지를 먼저 선택해주세요.");
+          return;
+        }
+        deletePage(editingId);
+      });
+
+      // 프로젝트 선택 변경
+      projectSelect.addEventListener("change", () => {
+        const targetId = projectSelect.value;
+        if (targetId && targetId !== currentProjectId) {
+          setCurrentProject(targetId);
+        }
+      });
+
+      // 새 프로젝트 생성
+      newProjectButton.addEventListener("click", async () => {
+        let name = prompt("새 프로젝트 이름을 입력하세요.", "새 프로젝트");
+        if (name === null) return; // 취소
+        name = name.trim();
+        if (!name) {
+          name = `프로젝트 ${projects.length + 1}`;
+        }
+        const project = createProject(name);
+        setCurrentProject(project.id);
+        
+        // 프로젝트 생성 후 즉시 저장
+        try {
+          await saveProject();
+        } catch (error) {
+          console.error("프로젝트 생성 후 저장 오류:", error);
+          // 오류가 발생해도 프로젝트는 생성되었으므로 계속 진행
+        }
+      });
+
+      // 프로젝트 삭제 버튼
+      deleteProjectButton.addEventListener("click", deleteProject);
+
+      // 프로젝트 저장 버튼
+      saveProjectButton.addEventListener("click", saveProject);
+
+      expandAllBtn.addEventListener("click", expandAll);
+      collapseAllBtn.addEventListener("click", collapseAll);
+      exportJsonBtn.addEventListener("click", exportJson);
+
+      // Undo/Redo 버튼 이벤트
+      document.getElementById('undo-button').addEventListener('click', undo);
+      document.getElementById('redo-button').addEventListener('click', redo);
+
+      // 복사/붙여넣기 버튼 이벤트
+      document.getElementById('paste-button').addEventListener('click', pastePage);
+
+      // 키보드 단축키
+      document.addEventListener('keydown', (e) => {
+        // 입력 필드에서는 단축키 무시
+        if (e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            e.target.tagName === 'SELECT') {
+          return;
+        }
+
+        // Ctrl+Z: Undo
+        if (e.ctrlKey && e.key === 'z') {
+          e.preventDefault();
+          undo();
+        }
+
+        // Ctrl+Y: Redo
+        if (e.ctrlKey && e.key === 'y') {
+          e.preventDefault();
+          redo();
+        }
+
+        // Ctrl+V: Paste
+        if (e.ctrlKey && e.key === 'v') {
+          e.preventDefault();
+          pastePage();
+        }
+      });
+
+      // 초기 프로젝트 생성 및 렌더
+      (async function initProjects() {
+        // 저장된 프로젝트 불러오기 시도
+        const loaded = await loadProjects();
+        if (!loaded) {
+          // 저장된 프로젝트가 없으면 기본 프로젝트 생성
+          const defaultProject = createProject("기본 프로젝트");
+          setCurrentProject(defaultProject.id);
+        } else {
+          // 저장된 프로젝트가 있으면 UI 갱신
+          refreshProjectSelect();
+        }
+
+        // Firebase 실시간 동기화 설정
+        if (isFirebaseConfigured) {
+          setupRealtimeSync();
+          updateFirebaseStatus(true);
+        } else {
+          updateFirebaseStatus(false);
+        }
+      })();
+
+      // Firebase 상태 표시 업데이트
+      function updateFirebaseStatus(connected) {
+        if (!firebaseStatus) return;
+        
+        if (connected) {
+          firebaseStatus.textContent = "🟢 실시간 동기화";
+          firebaseStatus.classList.remove("hidden", "border-slate-700", "bg-slate-900/60");
+          firebaseStatus.classList.add("border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
+          firebaseStatus.title = "Firebase 실시간 동기화 활성화됨";
+        } else {
+          firebaseStatus.textContent = "⚪ 로컬 저장";
+          firebaseStatus.classList.remove("hidden", "border-emerald-500/70", "bg-emerald-500/10", "text-emerald-200");
+          firebaseStatus.classList.add("border-slate-700", "bg-slate-900/60");
+          firebaseStatus.title = "Firebase가 설정되지 않음. localStorage를 사용합니다.";
+        }
+      }
+    </script>
+  </body>
+</html>
+
+
